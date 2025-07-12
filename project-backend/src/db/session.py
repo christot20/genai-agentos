@@ -1,6 +1,5 @@
 import psycopg
 import os
-from typing import AsyncGenerator, Optional
 
 
 
