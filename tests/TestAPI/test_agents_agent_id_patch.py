@@ -41,7 +41,7 @@ async def test_agents_patch_agent_valid_full_request_body(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {JWT_TOKEN} started")
+        # log.info(f"Agent with ID {JWT_TOKEN} started")
         await session.process_events()
 
     try:
@@ -141,7 +141,7 @@ async def test_agents_patch_agent_description_is_none(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {JWT_TOKEN} started")
+        # log.info(f"Agent with ID {JWT_TOKEN} started")
         await session.process_events()
 
     try:
@@ -248,7 +248,7 @@ async def test_agents_patch_agent_name_is_none(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {JWT_TOKEN} started")
+        # log.info(f"Agent with ID {JWT_TOKEN} started")
         await session.process_events()
 
     try:
@@ -355,7 +355,7 @@ async def test_agents_patch_agent_id_with_none(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {JWT_TOKEN} started")
+        # log.info(f"Agent with ID {JWT_TOKEN} started")
         await session.process_events()
 
     try:
@@ -460,7 +460,7 @@ async def test_agents_patch_agent_with_non_input_parameters(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {JWT_TOKEN} started")
+        # log.info(f"Agent with ID {JWT_TOKEN} started")
         await session.process_events()
 
     try:
@@ -572,7 +572,7 @@ async def test_agents_patch_agent_inactive_agent(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {JWT_TOKEN} started")
+        # log.info(f"Agent with ID {JWT_TOKEN} started")
         await session.process_events()
 
     try:

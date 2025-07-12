@@ -44,12 +44,12 @@ async def test_agentflows_delete(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     async def process_event_2():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_2} started")
+        # log.info(f"Agents with ID {AUTH_JWT_2} started")
         await asyncio.gather(session_2.process_events())
 
     try:
@@ -172,12 +172,12 @@ async def test_agentflows_delete_with_invalid_flow_id(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     async def process_event_2():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_2} started")
+        # log.info(f"Agents with ID {AUTH_JWT_2} started")
         await asyncio.gather(session_2.process_events())
 
     try:
@@ -289,12 +289,12 @@ async def test_agentflows_delete_already_deleted_agentflow(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     async def process_event_2():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_2} started")
+        # log.info(f"Agents with ID {AUTH_JWT_2} started")
         await asyncio.gather(session_2.process_events())
 
     try:

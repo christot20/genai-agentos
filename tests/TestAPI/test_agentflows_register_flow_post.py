@@ -47,12 +47,12 @@ async def test_agentflows_register_agentflows_with_two_valid_agents(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     async def process_event_2():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_2} started")
+        # log.info(f"Agents with ID {AUTH_JWT_2} started")
         await asyncio.gather(session_2.process_events())
 
     try:
@@ -173,7 +173,7 @@ async def test_agentflows_register_agentflows_with_single_agent(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     try:
@@ -268,12 +268,12 @@ async def test_agentflows_register_agentflow_with_empty_name_or_description(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     async def process_event_2():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_2} started")
+        # log.info(f"Agents with ID {AUTH_JWT_2} started")
         await asyncio.gather(session_2.process_events())
 
     try:
@@ -366,12 +366,12 @@ async def test_agentflows_register_agentflow_with_none_name_or_description(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     async def process_event_2():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_2} started")
+        # log.info(f"Agents with ID {AUTH_JWT_2} started")
         await asyncio.gather(session_2.process_events())
 
     try:
@@ -463,7 +463,7 @@ async def test_agentflows_register_agentflows_with_the_same_agent(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     try:
@@ -604,12 +604,12 @@ async def test_agentflows_register_agentflows_with_same_valid_agents(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     async def process_event_2():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_2} started")
+        # log.info(f"Agents with ID {AUTH_JWT_2} started")
         await asyncio.gather(session_2.process_events())
 
     try:
@@ -769,12 +769,12 @@ async def test_agentflows_register_agentflows_with_another_agentflow_id_as_agent
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     async def process_event_2():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_2} started")
+        # log.info(f"Agents with ID {AUTH_JWT_2} started")
         await asyncio.gather(session_2.process_events())
 
     try:

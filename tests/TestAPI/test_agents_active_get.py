@@ -47,7 +47,7 @@ async def test_active_agents_with_valid_limit_and_offset(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {JWT_TOKEN} started")
+        # log.info(f"Agent with ID {JWT_TOKEN} started")
         await session.process_events()
 
     try:
@@ -102,7 +102,7 @@ async def test_active_agents_with_valid_limit_and_offset(
             await event_task
 
         except asyncio.CancelledError:
-            # logging.info("Background task has been properly cancelled.")
+            # log.info("Background task has been properly cancelled.")
             pass
 
 
@@ -131,7 +131,7 @@ async def test_active_agents_with_limit_less_then_active_agents_amount(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {JWT_TOKEN} started")
+        # log.info(f"Agent with ID {JWT_TOKEN} started")
         await session.process_events()
 
     try:
@@ -160,7 +160,7 @@ async def test_active_agents_with_limit_less_then_active_agents_amount(
             await event_task
 
         except asyncio.CancelledError:
-            # logging.info("Background task has been properly cancelled.")
+            # log.info("Background task has been properly cancelled.")
             pass
 
 
@@ -192,7 +192,7 @@ async def test_active_agents_with_offset_equal_to_active_agents_amount(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {JWT_TOKEN} started")
+        # log.info(f"Agent with ID {JWT_TOKEN} started")
         await session.process_events()
 
     try:
@@ -221,7 +221,7 @@ async def test_active_agents_with_offset_equal_to_active_agents_amount(
             await event_task
 
         except asyncio.CancelledError:
-            # logging.info("Background task has been properly cancelled.")
+            # log.info("Background task has been properly cancelled.")
             pass
 
 
@@ -251,7 +251,7 @@ async def test_active_agents_with_offset_and_limit_are_equal_and_less_then_activ
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await session_1.process_events()
 
     try:
@@ -282,7 +282,7 @@ async def test_active_agents_with_offset_and_limit_are_equal_and_less_then_activ
                 await task
 
             except asyncio.CancelledError:
-                # logging.info("Background task has been properly cancelled.")
+                # log.info("Background task has been properly cancelled.")
                 pass
 
 
@@ -342,7 +342,7 @@ async def test_active_agents_with_default_offset_and_limit_with_active_agent(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {JWT_TOKEN} started")
+        # log.info(f"Agent with ID {JWT_TOKEN} started")
         await session.process_events()
 
     try:
@@ -395,7 +395,7 @@ async def test_active_agents_with_default_offset_and_limit_with_active_agent(
             await event_task
 
         except asyncio.CancelledError:
-            # logging.info("Background task has been properly cancelled.")
+            # log.info("Background task has been properly cancelled.")
             pass
 
 
@@ -448,7 +448,7 @@ async def test_active_agents_with_invalid_params_offset(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {JWT_TOKEN} started")
+        # log.info(f"Agent with ID {JWT_TOKEN} started")
         await session.process_events()
 
     try:
@@ -484,7 +484,7 @@ async def test_active_agents_with_invalid_params_offset(
             await event_task
 
         except asyncio.CancelledError:
-            # logging.info("Background task has been properly cancelled.")
+            # log.info("Background task has been properly cancelled.")
             pass
 
 
@@ -538,7 +538,7 @@ async def test_active_agents_with_invalid_params_offset(
 
 #     async def process_events():
 #         """Processes events for the GenAISession."""
-#         # logging.info(f"Agent with ID {JWT_TOKEN} started")
+#         # log.info(f"Agent with ID {JWT_TOKEN} started")
 #         await session.process_events()
 
 #     try:
@@ -574,4 +574,4 @@ async def test_active_agents_with_invalid_params_offset(
 #             await event_task
 
 #         except asyncio.CancelledError:
-#             logging.info("Background task has been properly cancelled.")
+#             log.info("Background task has been properly cancelled.")

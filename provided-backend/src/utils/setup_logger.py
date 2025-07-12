@@ -21,7 +21,7 @@ class NameFilter(logging.Filter):
 
 
 def init_logging() -> None:
-    """Init simple console logging."""
+    """Init simple console log."""
     log_level = logging.DEBUG if settings.DEBUG else logging.INFO
 
     root_log = logging.getLogger()

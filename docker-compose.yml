@@ -69,6 +69,8 @@ services:
     networks:
       - local-genai-network
     restart: unless-stopped
+    depends_on:
+      - provided-backend
     volumes:
       - shared-files-volume:${DEFAULT_FILES_FOLDER_NAME:-/files}
     extra_hosts:
