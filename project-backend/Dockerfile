@@ -33,4 +33,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 COPY . /app
 
-CMD ["uvicorn", "main:app", "--log-level", "info", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["uvicorn", "main:app", "--log-level", "critical", "--host", "0.0.0.0", "--port", "8001"]
