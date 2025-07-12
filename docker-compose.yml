@@ -12,8 +12,8 @@ services:
     env_file: .env
     environment:
       - NODE_ENV=production
-      - VITE_API_URL=http://backend:8000
-      - VITE_WS_URL=ws://backend:8000
+      - VITE_API_URL=http://provided-backend:8000
+      - VITE_WS_URL=ws://provided-backend:8000
     networks:
      - local-genai-network
     restart: unless-stopped
@@ -40,10 +40,10 @@ services:
     depends_on:
       - router
 
-  backend:
-    container_name: genai-backend
+  provided-backend:
+    container_name: genai-provided-backend
     build:
-      context: ./backend
+      context: provided-backend
     ports:
       - "8000:8000"
     env_file: .env
@@ -59,10 +59,25 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  project-backend:
+    container_name: genai-project-backend
+    build:
+      context: project-backend
+    ports:
+      - "8001:8001"
+    env_file: .env
+    networks:
+      - local-genai-network
+    restart: unless-stopped
+    volumes:
+      - shared-files-volume:${DEFAULT_FILES_FOLDER_NAME:-/files}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   postgres:
     container_name: genai-postgres
     build:
-      context: ./backend/scripts
+      context: provided-backend/scripts
       dockerfile: ./Dockerfile.postgres
     ports:
       - "5432:5432"
@@ -76,7 +91,7 @@ services:
      - local-genai-network
     restart: unless-stopped
     volumes:
-        - ./backend/scripts/postgres.conf:/etc/postgresql/postgresql.conf
+        - ./provided-backend/scripts/postgres.conf:/etc/postgresql/postgresql.conf
         - postgres-volume:/var/lib/postgresql/data
   redis:
     container_name: genai-redis
@@ -91,7 +106,7 @@ services:
   migration_svc:
     container_name: genai-migration-svc
     build:
-      context: ./backend
+      context: provided-backend
     depends_on:
       - postgres
     env_file:
@@ -104,7 +119,7 @@ services:
   celery:
     container_name: genai-celery-worker
     build: 
-      context: ./backend
+      context: provided-backend
     command: celery -A src.celery.celery_app worker --loglevel=debug
     networks:
      - local-genai-network
@@ -114,7 +129,7 @@ services:
   celery-beat:
     container_name: genai-celery-beat
     build: 
-      context: ./backend
+      context: provided-backend
     command: celery -A src.celery.celery_app beat --loglevel=debug
     networks:
      - local-genai-network
