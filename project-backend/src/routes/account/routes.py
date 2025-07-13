@@ -31,12 +31,13 @@ async def create(account_info: CreateRequest, db_conn: psycopg.Connection = Depe
         table = os.environ.get("POSTGRES_ACCOUNT_TABLE")
 
         uid = str(uuid.uuid4())
-        username = account_info.email
+        first_name = account_info.firstName
+        email = account_info.email
         salt, password_hash = hash_string(m = account_info.password)
 
         try:
-            db_curr.execute(query =  f"insert into {schema}.{table} (uuid, username, salt, password) values (%s, %s, %s, %s)",
-                            params = (uid, username, salt, password_hash))
+            db_curr.execute(query =  f"insert into {schema}.{table} (uuid, first_name, email, salt, password) values (%s, %s, %s, %s, %s)",
+                            params = (uid, first_name, email, salt, password_hash))
             db_conn.commit()
         except psycopg.errors.UniqueViolation:
             return JSONResponse(status_code = status.HTTP_409_CONFLICT,
@@ -61,29 +62,26 @@ async def login(account_info: LoginRequest, db_conn: psycopg.Connection = Depend
         table = os.environ.get("POSTGRES_ACCOUNT_TABLE")
 
         try:
-            username = account_info.email
-            db_curr.execute(query = f"select * from {schema}.{table} whebrare username = %s",
-                            params = (username,))
+            email = account_info.email
+            db_curr.execute(query = f"select uuid, salt, password, creation_date from {schema}.{table} where email = %s",
+                            params = (email,))
             query_response = db_curr.fetchone()
             if query_response is None:
                 return JSONResponse(status_code = status.HTTP_401_UNAUTHORIZED,
                                     content = jsonable_encoder(CreateResponse(message = "Username or password is incorrect..")))
 
-            salt = query_response[2]
-            password_hash = query_response[3]
+            uuid = query_response[0]
+            salt = query_response[1]
+            password_hash = query_response[2]
+            creation_date = query_response[3]
             _, request_hash = hash_string(m = account_info.password, salt = salt)
             if request_hash != password_hash:
                 return JSONResponse(status_code = status.HTTP_401_UNAUTHORIZED,
                                     content = jsonable_encoder(CreateResponse(message = "Username or password is incorrect..")))
-
-            uuid = query_response[0]
-            username = query_response[1]
-            creation_date = query_response[4]
             jwt = create_jwt(uuid = uuid,
-                             username = username,
+                             username = email,
                              creation_date = creation_date)
         except Exception as e:
-            dbg_log(f"{e}")
             return JSONResponse(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 content = jsonable_encoder(LoginResponse(message = "Unknown error occurred when logging in.")))
 
