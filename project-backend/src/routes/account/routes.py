@@ -63,7 +63,7 @@ async def login(account_info: LoginRequest, db_conn: psycopg.Connection = Depend
         try:
             username = account_info.email
             db_curr.execute(query = f"select * from {schema}.{table} where username = %s",
-                             params = (username,))
+                            params = (username,))
             query_response = db_curr.fetchone()
             if query_response is None:
                 return JSONResponse(status_code = status.HTTP_401_UNAUTHORIZED,
@@ -83,7 +83,7 @@ async def login(account_info: LoginRequest, db_conn: psycopg.Connection = Depend
                              username = username,
                              creation_date = creation_date)
         except Exception as e:
-            print(e)
+            dbg_log(f"{e}")
             return JSONResponse(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 content = jsonable_encoder(LoginResponse(message = "Unknown error occurred when logging in.")))
 
