@@ -31,7 +31,7 @@ async def create(account_info: CreateRequest, db_conn: psycopg.Connection = Depe
         table = os.environ.get("POSTGRES_ACCOUNT_TABLE")
 
         uid = str(uuid.uuid4())
-        username = account_info.username
+        username = account_info.email
         salt, password_hash = hash_string(m = account_info.password)
 
         try:
@@ -61,7 +61,7 @@ async def login(account_info: LoginRequest, db_conn: psycopg.Connection = Depend
         table = os.environ.get("POSTGRES_ACCOUNT_TABLE")
 
         try:
-            username = account_info.username
+            username = account_info.email
             db_curr.execute(query = f"select * from {schema}.{table} where username = %s",
                              params = (username,))
             query_response = db_curr.fetchone()

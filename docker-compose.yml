@@ -3,17 +3,13 @@ networks:
     driver: bridge
 
 services:
-  frontend:
-    container_name: genai-frontend
+  project-frontend:
+    container_name: genai-frontend-react
     build:
-      context: ./frontend
+      context: ./frontend-react
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     env_file: .env
-    environment:
-      - NODE_ENV=production
-      - VITE_API_URL=http://provided-backend:8000
-      - VITE_WS_URL=ws://provided-backend:8000
     networks:
      - local-genai-network
     restart: unless-stopped

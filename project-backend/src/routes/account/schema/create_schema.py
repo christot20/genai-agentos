@@ -3,8 +3,9 @@ from pydantic import BaseModel
 
 
 class CreateRequest(BaseModel):
-    username: str
+    email: str
     password: str
+    firstName: str
 
 class CreateResponse(BaseModel):
     message: str

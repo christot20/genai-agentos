@@ -1,7 +1,7 @@
-const API_BASE = 'http://localhost:8000/api'; // Change to your backend URL
+const API_BASE = 'http://localhost:8001/api'; // Change to your backend URL
 
 export async function signup({ email, password, firstName }) {
-  const res = await fetch(`${API_BASE}/signup`, {
+  const res = await fetch(`${API_BASE}/account/create`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password, firstName }),
@@ -11,7 +11,7 @@ export async function signup({ email, password, firstName }) {
 }
 
 export async function signin({ email, password }) {
-  const res = await fetch(`${API_BASE}/signin`, {
+  const res = await fetch(`${API_BASE}/account/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
