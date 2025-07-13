@@ -10,6 +10,7 @@ from src.routes.message.schema.message_schema import CreateRequest, CreateRespon
 from src.routes.account.util.token import validate_jwt, get_uuid_from_jwt
 from src.logging.log import dbg_log
 from src.db.session import get_db_session
+from src.services.ai_service import ai_service
 
 
 
@@ -32,16 +33,53 @@ async def create(message_info: CreateRequest, token: HTTPAuthorizationCredential
             return JSONResponse(status_code = status.HTTP_401_UNAUTHORIZED,
                                 content = jsonable_encoder(CreateResponse(message = "Unauthorized")))
 
-        message_id = uuid.uuid4()
+        # Get user ID from token
+        user_id = get_uuid_from_jwt(token, db_curr)
+        
+        # Create message ID for user message
+        user_message_id = uuid.uuid4()
         conversation_id = message_info.conversation_id
         message = message_info.message
+        
+        # Save user message to database
         db_curr.execute(query = f"insert into {schema}.{table} (message_id, conversation_id, sender_type, message) values (%s, %s, %s, %s)",
-                        params = (message_id, conversation_id, "User", message))
+                        params = (user_message_id, conversation_id, "User", message))
         db_conn.commit()
 
+        # Send message to AI agent and get response
+        try:
+            # Use conversation_id as session_id for the AI service
+            session_id = str(conversation_id)
+            
+            ai_response = await ai_service.send_message_to_agent(
+                user_id=str(user_id),
+                session_id=session_id,
+                message=message,
+                conversation_id=str(conversation_id)
+            )
+            
+            # Save AI response to database
+            ai_message_id = uuid.uuid4()
+            ai_response_text = ai_response.get("response", "No response from AI agent")
+            
+            db_curr.execute(query = f"insert into {schema}.{table} (message_id, conversation_id, sender_type, message) values (%s, %s, %s, %s)",
+                            params = (ai_message_id, conversation_id, "AI", ai_response_text))
+            db_conn.commit()
+            
+            dbg_log(f"AI response saved: {ai_response_text[:50]}...")
+            
+        except Exception as ai_error:
+            dbg_log(f"Error getting AI response: {ai_error}")
+            # Continue without AI response - user message was still saved
+            ai_response = {"response": "Sorry, I couldn't process your message at this time.", "is_success": False}
+
         return JSONResponse(status_code = status.HTTP_201_CREATED,
-                            content = jsonable_encoder(CreateResponse(message = "Message create successfully.",
-                                                                      message_id = message_id)))
+                            content = jsonable_encoder(CreateResponse(
+                                message = "Message created successfully with AI response.",
+                                message_id = user_message_id,
+                                ai_response = ai_response
+                            )))
+                            
     except psycopg.errors.ForeignKeyViolation as _:
         return JSONResponse(status_code = status.HTTP_400_BAD_REQUEST,
                             content = jsonable_encoder(CreateResponse(message = "Invalid conversation_id supplied.")))
@@ -83,3 +121,41 @@ async def list(message_info: ListRequest, token: HTTPAuthorizationCredentials = 
                                                                     messages = messages)))
     finally:
         dbg_log(f"list() end")
+
+@message_router.post("/test-ai")
+async def test_ai_connection(token: HTTPAuthorizationCredentials = Depends(security)):
+    """Test endpoint to verify AI service connection."""
+    try:
+        dbg_log(f"test_ai_connection() begin")
+        
+        # Get user ID from token
+        user_id = get_uuid_from_jwt(token, None)  # We don't need db cursor for this
+        
+        # Test the AI service with a simple message
+        test_response = await ai_service.send_message_to_agent(
+            user_id=str(user_id),
+            session_id="test-session",
+            message="Hello, this is a test message to verify AI service connection.",
+            conversation_id="test-conversation"
+        )
+        
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "message": "AI service test completed",
+                "ai_response": test_response,
+                "is_success": test_response.get("is_success", False)
+            }
+        )
+        
+    except Exception as e:
+        dbg_log(f"test_ai_connection() error: {e}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "message": f"AI service test failed: {str(e)}",
+                "is_success": False
+            }
+        )
+    finally:
+        dbg_log(f"test_ai_connection() end")
