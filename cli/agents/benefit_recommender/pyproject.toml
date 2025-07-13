@@ -11,4 +11,10 @@ dependencies = [
     "python-dotenv>=1.1.0",
     "requests>=2.32.3",
     "pandas",
+    "langchain",
+    "langchain_community",
+    "openai",
+    "python-dotenv",
+    "chromadb",
+    "tiktoken"
 ]

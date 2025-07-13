@@ -3,18 +3,24 @@ import pandas as pd
 from typing import Annotated
 from genai_session.session import GenAISession
 from genai_session.utils.context import GenAIContext
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import OpenAIEmbeddings
+from dotenv import load_dotenv
 
 AGENT_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDU3OWU1ZC01ODg0LTRlYjctOGIxNy03Y2M1YjY1NDljMTgiLCJleHAiOjI1MzQwMjMwMDc5OSwidXNlcl9pZCI6IjI5OGU3MTUzLWU4NzMtNDBkZC1iZWI1LWI1ZmIzMWMyYTgwZSJ9.cPnbkdHojQlgFOodotAMaS5S75Xq--BftHURF3PYcEM" # noqa: E501
 session = GenAISession(jwt_token=AGENT_JWT)
 
-# Load Employee data
-EMPLOYEE_CSV_PATH = "../../../agent_data/data/employees.csv"
-df = pd.read_csv(EMPLOYEE_CSV_PATH)
+load_dotenv()
+
+CHROMA_PATH = "../../../chroma_db"
+embeddings = OpenAIEmbeddings()
+vectordb = Chroma(persist_directory=CHROMA_PATH, embedding_function=embeddings)
+retriever = vectordb.as_retriever(search_type="similarity", search_kwargs={"k": 5})
 
 
 @session.bind(
     name="benefit_recommender",
-    description="Agent that looks up work benefits for an employee from a CSV"
+    description="Agent that looks up work benefits for an employee from a vector DB"
 )
 async def benefit_recommender(
     agent_context: GenAIContext,
@@ -23,21 +29,27 @@ async def benefit_recommender(
     user_query: Annotated[str, "User requesting their work benefits (e.g. 'What are my work benefits' or 'What are my employee benefits?')"],
 ):
     agent_context.logger.info("Inside benefit_recommender")
-    # Find employee (case-insensitive match)
-    employee = df[
-        (df["first_name"].str.lower() == first_name.lower()) &
-        (df["last_name"].str.lower() == last_name.lower())
-    ]
 
-    # Make sure we found the employee before trying to access the row
-    if employee.empty:
-        return f"No employee found with name '{first_name} {last_name}'."
+    # Compose a query to search by employee name and benefits context
+    query = f"employee {first_name} {last_name} benefits"
 
-    # Now it's safe to access the first (and hopefully only) match
-    row = employee.iloc[0]
-    
-    if "benefits" in user_query.lower():
-        return f"{first_name} {last_name}'s eligible benefits are {row['work_benefits']}."
+    docs = retriever.get_relevant_documents(query)
+
+    if not docs:
+        return f"No benefits info found for {first_name} {last_name}."
+
+    # Parse and find the correct employee in the retrieved documents
+    for doc in docs:
+        content = doc.page_content.lower()
+        if first_name.lower() in content and last_name.lower() in content:
+            # Assuming content has a 'work_benefits' field in "work_benefits: <info>" format
+            for part in content.split("|"):
+                if "work_benefits:" in part:
+                    benefits = part.split("work_benefits:")[1].strip()
+                    return f"{first_name} {last_name}'s eligible benefits are: {benefits}"
+
+    return f"No benefits info found for {first_name} {last_name}."
+
 
 async def main():
     print(f"Agent with token '{AGENT_JWT}' started")
@@ -45,5 +57,6 @@ async def main():
 
 
 if __name__ == "__main__":
+    import asyncio
     asyncio.run(main())
 
