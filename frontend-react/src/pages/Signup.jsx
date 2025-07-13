@@ -21,7 +21,7 @@ const Signup = () => {
       const result = await signup({ email, password, firstName });
       // After successful signup, automatically login to get the token
       const loginResult = await signin({ email, password });
-      setCookie('userId', loginResult.access_token);
+      setCookie('access_token', loginResult.access_token); // Use access_token
       navigate('/chat');
     } catch (err) {
       setError(err.message || 'Sign up failed');
@@ -31,7 +31,7 @@ const Signup = () => {
   return (
     <div className='homepage-container'>
       <HomepageHeaderWLogo headerText="Sign up for Navicare" logo={logo} logoAltText="GenAI AgentOS Logo" caption="Please sign up using your first name, email, and password or click log into account if you already have one." />
-      <InputWLabel label="First Name" type="text" placeholder="First Name" value={firstName} onChange={setFirstName} id="firstName" />
+      <InputWLabel label="Username" type="text" placeholder="Username" value={firstName} onChange={setFirstName} id="firstName" />
       <InputWLabel label="Email" type="email" placeholder="Email" value={email} onChange={setEmail} id="email" />
       <InputWLabel label="Password" type="password" placeholder="Password" value={password} onChange={setPassword} id="password" />
       {error && <div style={{ color: '#FF535C', marginBottom: 12, textAlign: 'center', marginInline: 'auto', width:"fit-content" }}>{error}</div>}

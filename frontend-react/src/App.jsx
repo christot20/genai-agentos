@@ -11,30 +11,30 @@ import './styles/App.scss';
 import { useCookies } from 'react-cookie';
 
 function ProtectedRoute({ children }) {
-  const [cookies] = useCookies(['userId']);
-  if (!cookies.userId) {
+  const [cookies] = useCookies(['access_token']);
+  if (!cookies.access_token) {
     return <Navigate to="/signin" replace />;
   }
   return children;
 }
 
 function AuthenticatedRoute({ children }) {
-  const [cookies] = useCookies(['userId']);
-  if (cookies.userId) {
+  const [cookies] = useCookies(['access_token']);
+  if (cookies.access_token) {
     return <Navigate to="/chat" replace />;
   }
   return children;
 }
 
 function App() {
-  const [cookies] = useCookies(['userId']);
+  const [cookies] = useCookies(['access_token']);
 
   return (
     <Router>
       <div className="App">
         <main className="main-content">
           <Routes>
-            <Route path="/" element={cookies.userId ? <Navigate to="/chat" replace /> : <Home />} />
+            <Route path="/" element={cookies.access_token ? <Navigate to="/chat" replace /> : <Home />} />
             <Route path="/signin" element={<AuthenticatedRoute><SignIn /></AuthenticatedRoute>} />
             <Route path="/signup" element={<AuthenticatedRoute><Signup /></AuthenticatedRoute>} />
             <Route path="/intakeprocess" element={<ProtectedRoute><IntakeProcess /></ProtectedRoute>} />
