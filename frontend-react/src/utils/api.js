@@ -83,4 +83,8 @@ export async function testAIConnection() {
     headers: getAuthHeaders(),
   });
   return handleResponse(res);
+}
+
+export function logout() {
+  cookies.remove('userId');
 } 

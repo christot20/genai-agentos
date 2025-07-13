@@ -22,7 +22,7 @@ const Signin = () => {
         // Redirect or show success (example: navigate('/dashboard'))
         navigate('/chat');
       } catch (err) {
-        setError(err.message || 'Sign up failed');
+        setError(err.message || 'Sign in failed');
       }
   };
 

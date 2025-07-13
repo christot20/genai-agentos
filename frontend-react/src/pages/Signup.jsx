@@ -6,7 +6,7 @@ import InputWLabel from '../components/InputWLabel';
 import PrimaryBtn from '../components/PrimaryBtn';
 import SecondaryBtn from '../components/SecondaryBtn';
 import { useNavigate } from 'react-router-dom';
-import { signup } from '../utils/api';
+import { signup, signin } from '../utils/api';
 import { setCookie } from '../utils/cookies';
 
 const Signup = () => {
@@ -19,8 +19,9 @@ const Signup = () => {
   const handleSignup = async () => {
     try {
       const result = await signup({ email, password, firstName });
-      setCookie('userId', result.access_token);
-      // Redirect or show success (example: navigate('/dashboard'))
+      // After successful signup, automatically login to get the token
+      const loginResult = await signin({ email, password });
+      setCookie('userId', loginResult.access_token);
       navigate('/chat');
     } catch (err) {
       setError(err.message || 'Sign up failed');
