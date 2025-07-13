@@ -2,17 +2,11 @@ import React from 'react';
 import './ChatMessage.scss';
 
 const ChatMessage = ({ message, from, sender_type }) => {
-  // Handle AI reasoning messages differently
+  // Handle AI reasoning messages with loading-style formatting
   if (sender_type === 'AI_Reasoning') {
     return (
-      <div className="chat-message chat-message-reasoning">
-        <div className="reasoning-header">
-          <span className="reasoning-icon">🧠</span>
-          <span className="reasoning-title">Agent Reasoning</span>
-        </div>
-        <div className="reasoning-content">
-          {formatReasoningMessage(message)}
-        </div>
+      <div style={{ color: '#FF535C', textAlign: 'center', margin: 8 }}>
+        {formatReasoningMessage(message)}
       </div>
     );
   }

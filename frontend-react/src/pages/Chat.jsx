@@ -91,19 +91,17 @@ const Chat = () => {
     try {
       console.log('Sending message:', message, 'to conversation:', conversationId);
       const response = await createMessage(conversationId, message);
+      console.log('Response:', response); 
+      // Always add reasoning message for the most recent response
+      const reasoningMessage = {
+        message_id: `reasoning-${Date.now()}`,
+        message: formatAgenticReasoning(response.ai_response?.agents_trace || []),
+        sender_type: 'AI_Reasoning',
+        timestamp: new Date().toISOString()
+      };
       
-      // Check if we have AI response with reasoning data
-      if (response.ai_response && response.ai_response.agents_trace) {
-        // Add reasoning message to show the agent's thought process
-        const reasoningMessage = {
-          message_id: `reasoning-${Date.now()}`,
-          message: formatAgenticReasoning(response.ai_response.agents_trace),
-          sender_type: 'AI_Reasoning',
-          timestamp: new Date().toISOString()
-        };
-        
-        setChatMessages(prev => [...prev, reasoningMessage]);
-      }
+      setChatMessages(prev => [...prev, reasoningMessage]);
+      setLoading(false); // Stop loading since we have reasoning data
       
       // Add a small delay to ensure AI response is processed
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -132,57 +130,37 @@ const Chat = () => {
         retryCount++;
       }
       
+      // Replace the reasoning message with the final messages
       setChatMessages(msgRes.messages || []);
       setConversationTitle(msgRes.conversation_title || 'New Chat');
     } catch (e) {
       console.error('Error sending message:', e);
       // Remove the temporary user message if there was an error
       setChatMessages(prev => prev.filter(msg => msg.message_id !== userMessage.message_id));
+      setLoading(false);
       // Optionally show error to user
     }
-    setLoading(false);
   };
 
   // Helper function to format agentic reasoning for display
   const formatAgenticReasoning = (agentsTrace) => {
-    if (!agentsTrace || !Array.isArray(agentsTrace)) {
-      return "No reasoning data available";
+    if (!agentsTrace || !Array.isArray(agentsTrace) || agentsTrace.length === 0) {
+      return "Processing your request...";
     }
 
-    let reasoningText = "🤖 **Agent Reasoning Process:**\n\n";
+    let reasoningText = "🤖 Processing with agents: ";
     
     agentsTrace.forEach((trace, index) => {
       const agentName = trace.name || 'Unknown Agent';
       const isSuccess = trace.is_success !== false;
       const status = isSuccess ? "✅" : "❌";
       
-      reasoningText += `${status} **${agentName}**\n`;
-      
-      if (trace.input) {
-        reasoningText += `📥 **Input:** ${JSON.stringify(trace.input, null, 2)}\n`;
-      }
-      
-      if (trace.output) {
-        if (typeof trace.output === 'string') {
-          reasoningText += `📤 **Output:** ${trace.output}\n`;
-        } else {
-          reasoningText += `📤 **Output:** ${JSON.stringify(trace.output, null, 2)}\n`;
-        }
-      }
+      if (index > 0) reasoningText += " → ";
+      reasoningText += `${status} ${agentName}`;
       
       if (trace.execution_time) {
-        reasoningText += `⏱️ **Execution Time:** ${trace.execution_time.toFixed(2)}s\n`;
+        reasoningText += ` (${trace.execution_time.toFixed(1)}s)`;
       }
-      
-      if (trace.type) {
-        reasoningText += `🔧 **Type:** ${trace.type}\n`;
-      }
-      
-      if (trace.url) {
-        reasoningText += `🔗 **URL:** ${trace.url}\n`;
-      }
-      
-      reasoningText += "\n";
     });
     
     return reasoningText;
@@ -287,7 +265,6 @@ const Chat = () => {
                   sender_type={msg.sender_type}
                 />
               ))}
-              {loading && <div style={{ color: '#FF535C', textAlign: 'center', margin: 8 }}>Loading...</div>}
               <div ref={chatEndRef} />
             </div>
           </>
