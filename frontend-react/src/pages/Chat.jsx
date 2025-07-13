@@ -168,15 +168,6 @@ const Chat = () => {
         )}
         {chatActive && (
           <>
-            {/* Conversation Header */}
-            <div style={{ 
-              padding: '16px 0', 
-              borderBottom: '1px solid #e0e0e0',
-              marginBottom: '16px'
-            }}>
-              <h3 style={{ margin: 0, color: '#333' }}>
-                {conversationTitle || 'Chat'}
-              </h3>
               {conversations.length > 1 && (
                 <div style={{ marginTop: '8px' }}>
                   <small style={{ color: '#666' }}>Other conversations:</small>
@@ -201,7 +192,6 @@ const Chat = () => {
                   </div>
                 </div>
               )}
-            </div>
             
             {/* Chat Messages */}
             <div
