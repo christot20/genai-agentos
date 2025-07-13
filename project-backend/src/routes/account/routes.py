@@ -62,7 +62,7 @@ async def login(account_info: LoginRequest, db_conn: psycopg.Connection = Depend
 
         try:
             username = account_info.email
-            db_curr.execute(query = f"select * from {schema}.{table} where username = %s",
+            db_curr.execute(query = f"select * from {schema}.{table} whebrare username = %s",
                             params = (username,))
             query_response = db_curr.fetchone()
             if query_response is None:
