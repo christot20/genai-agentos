@@ -1,50 +1,43 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Navigation from './merged/components/Navigation';
-import Home from './merged/pages/Home';
-import SignIn from './merged/pages/SignIn';
-import Signup from './merged/pages/Signup';
-import IntakeProcess from './merged/pages/IntakeProcess';
-import BenefitsOverview from './merged/pages/BenefitsOverview';
-import Chat from './merged/pages/Chat';
-import './merged/styles/App.scss';
-import { authService } from './services/authService';
+import { RouterProvider } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { LogProvider } from './contexts/LogContext';
+import { SettingsProvider } from './contexts/SettingsContext';
+import { ChatHistoryProvider } from './contexts/ChatHistoryContext';
+import { router } from './router';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const currentUser = authService.getCurrentUser();
-  if (!currentUser) {
-    return <Navigate to="/signin" replace />;
-  }
-  return <>{children}</>;
-}
-
-function AuthenticatedRoute({ children }: { children: React.ReactNode }) {
-  const currentUser = authService.getCurrentUser();
-  if (currentUser) {
-    return <Navigate to="/chat" replace />;
-  }
-  return <>{children}</>;
-}
-
-function App() {
-  const currentUser = authService.getCurrentUser();
-
+export function App() {
   return (
-    <Router>
-      <div className="App">
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={currentUser ? <Navigate to="/chat" replace /> : <Home />} />
-            <Route path="/signin" element={<AuthenticatedRoute><SignIn /></AuthenticatedRoute>} />
-            <Route path="/signup" element={<AuthenticatedRoute><Signup /></AuthenticatedRoute>} />
-            <Route path="/intakeprocess" element={<ProtectedRoute><IntakeProcess /></ProtectedRoute>} />
-            <Route path="/benefitsoverview" element={<ProtectedRoute><BenefitsOverview /></ProtectedRoute>} />
-            <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+    <ThemeProvider>
+      <AuthProvider>
+        <ChatHistoryProvider>
+          <SettingsProvider>
+            <LogProvider>
+              <RouterProvider
+                router={router}
+                future={{
+                  v7_startTransition: true,
+                }}
+              />
+              <ToastContainer
+                position="top-center"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                className="pt-20"
+              />
+            </LogProvider>
+          </SettingsProvider>
+        </ChatHistoryProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
-
-export default App;
