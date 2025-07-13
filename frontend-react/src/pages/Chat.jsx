@@ -51,6 +51,7 @@ const Chat = () => {
           convoId = created.conversation_id;
         }
         setConversationId(convoId);
+        console.log(convoId);
         // Fetch messages for this conversation
         if (convoId) {
           const msgRes = await getMessageList(convoId);
