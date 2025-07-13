@@ -32,7 +32,7 @@ async def test_agent_agent_id_valid_agent_id(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {JWT_TOKEN} started")
+        # log.info(f"Agent with ID {JWT_TOKEN} started")
         await session.process_events()
 
     try:
@@ -84,7 +84,7 @@ async def test_agent_agent_id_wrong_agent_id(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {JWT_TOKEN} started")
+        # log.info(f"Agent with ID {JWT_TOKEN} started")
         await session.process_events()
 
     try:
@@ -131,7 +131,7 @@ async def test_agent_agent_id_invalid_agent_id(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {JWT_TOKEN} started")
+        # log.info(f"Agent with ID {JWT_TOKEN} started")
         await session.process_events()
 
     try:

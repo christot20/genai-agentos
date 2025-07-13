@@ -1,1 +1,0 @@
-export const MAX_LAST_MESSAGES_HINT = `Defines how many recent messages (from both user and LLM) the model can access when generating a response. A larger value helps the model maintain context over longer conversations, improving coherence. Smaller values are faster and cheaper, but may reduce continuity.`;

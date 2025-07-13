@@ -55,17 +55,17 @@ async def test_agentflows_patch_everything_with_valid_data(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     async def process_event_2():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_2} started")
+        # log.info(f"Agents with ID {AUTH_JWT_2} started")
         await asyncio.gather(session_2.process_events())
 
     async def process_event_3():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_3} started")
+        # log.info(f"Agents with ID {AUTH_JWT_3} started")
         await asyncio.gather(session_3.process_events())
 
     try:
@@ -277,12 +277,12 @@ async def test_agentflows_patch_with_invalid_data(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     async def process_event_2():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_2} started")
+        # log.info(f"Agents with ID {AUTH_JWT_2} started")
         await asyncio.gather(session_2.process_events())
 
     try:
@@ -443,12 +443,12 @@ async def test_agentflows_patch_with_non_existing_agents(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     async def process_event_2():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_2} started")
+        # log.info(f"Agents with ID {AUTH_JWT_2} started")
         await asyncio.gather(session_2.process_events())
 
     try:
@@ -594,17 +594,17 @@ async def test_agentflows_patch_flow_single_agent_id(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     async def process_event_2():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_2} started")
+        # log.info(f"Agents with ID {AUTH_JWT_2} started")
         await asyncio.gather(session_2.process_events())
 
     async def process_event_3():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_3} started")
+        # log.info(f"Agents with ID {AUTH_JWT_3} started")
         await asyncio.gather(session_3.process_events())
 
     try:
@@ -684,12 +684,12 @@ async def test_agentflows_patch_flow_id_as_agent_id(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     async def process_event_2():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_2} started")
+        # log.info(f"Agents with ID {AUTH_JWT_2} started")
         await asyncio.gather(session_2.process_events())
 
     try:
@@ -847,12 +847,12 @@ async def test_agentflows_patch_agentflow_that_dows_not_exist(
 
     async def process_event_1():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_1} started")
+        # log.info(f"Agents with ID {AUTH_JWT_1} started")
         await asyncio.gather(session_1.process_events())
 
     async def process_event_2():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agents with ID {AUTH_JWT_2} started")
+        # log.info(f"Agents with ID {AUTH_JWT_2} started")
         await asyncio.gather(session_2.process_events())
 
     try:
