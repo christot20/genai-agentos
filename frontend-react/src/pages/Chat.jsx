@@ -76,7 +76,18 @@ const Chat = () => {
 
   const handleSend = async (message) => {
     if (!conversationId) return;
+    
+    // Immediately add user message to the chat
+    const userMessage = {
+      message_id: `temp-${Date.now()}`,
+      message: message,
+      sender_type: 'User',
+      timestamp: new Date().toISOString()
+    };
+    
+    setChatMessages(prev => [...prev, userMessage]);
     setLoading(true);
+    
     try {
       console.log('Sending message:', message, 'to conversation:', conversationId);
       await createMessage(conversationId, message);
@@ -112,6 +123,8 @@ const Chat = () => {
       setConversationTitle(msgRes.conversation_title || 'New Chat');
     } catch (e) {
       console.error('Error sending message:', e);
+      // Remove the temporary user message if there was an error
+      setChatMessages(prev => prev.filter(msg => msg.message_id !== userMessage.message_id));
       // Optionally show error to user
     }
     setLoading(false);
