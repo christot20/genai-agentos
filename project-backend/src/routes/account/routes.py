@@ -1,5 +1,3 @@
-from multiprocessing.managers import public_methods
-
 import psycopg
 import os
 import uuid
@@ -46,7 +44,7 @@ async def create(account_info: CreateRequest, db_conn: psycopg.Connection = Depe
             return JSONResponse(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 content = jsonable_encoder(CreateResponse(message="Unknown error occurred when creating an account.")))
 
-        return JSONResponse(status_code = status.HTTP_200_OK,
+        return JSONResponse(status_code = status.HTTP_201_CREATED,
                             content = jsonable_encoder(CreateResponse(message = "Account created successfully.")))
     finally:
         dbg_log(f"create() end")

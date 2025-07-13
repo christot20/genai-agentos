@@ -37,7 +37,6 @@ def validate_jwt(jwt_credentials: HTTPAuthorizationCredentials, db_curr: psycopg
         schema = os.environ.get("POSTGRES_NAVICARE_SCHEMA")
         table = os.environ.get("POSTGRES_ACCOUNT_TABLE")
 
-
         try:
             if jwt_credentials.scheme != "Bearer":
                 return False
@@ -50,7 +49,7 @@ def validate_jwt(jwt_credentials: HTTPAuthorizationCredentials, db_curr: psycopg
             username = decoded_jwt["username"]
             creation_date = decoded_jwt["creation_date"]
 
-            db_curr.execute(query = f"select * from {schema}.{table} where uuid = %s and username = %s and creation_date = %s",
+            db_curr.execute(query = f"select * from {schema}.{table} where uuid = %s and email = %s and creation_date = %s",
                             params = (uuid, username, creation_date))
             if db_curr.fetchone() is None:
                 return False
@@ -62,3 +61,20 @@ def validate_jwt(jwt_credentials: HTTPAuthorizationCredentials, db_curr: psycopg
         return True
     finally:
         dbg_log(f"validate_jwt() end")
+
+def get_uuid_from_jwt(jwt_credentials: HTTPAuthorizationCredentials, db_curr: psycopg.Cursor):
+    try:
+        dbg_log(f"get_uuid_from_jwt() begin")
+
+        key = os.environ.get("JWT_SECRET_KEY")
+        algorithm = os.environ.get("JWT_ALGORITHM")
+        schema = os.environ.get("POSTGRES_NAVICARE_SCHEMA")
+        table = os.environ.get("POSTGRES_ACCOUNT_TABLE")
+
+        decoded_jwt = jwt.decode(jwt=jwt_credentials.credentials,
+                                 key=key,
+                                 algorithms=[algorithm])
+
+        return decoded_jwt["uuid"]
+    finally:
+        dbg_log(f"get_uuid_from_jwt() end")
