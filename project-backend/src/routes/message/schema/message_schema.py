@@ -1,6 +1,7 @@
 import uuid
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional, Dict, Any
 
 
 
@@ -11,6 +12,7 @@ class CreateRequest(BaseModel):
 class CreateResponse(BaseModel):
     message: str
     message_id: uuid.UUID | None = None
+    ai_response: Optional[Dict[str, Any]] = None
 
 class ListRequest(BaseModel):
     conversation_id: uuid.UUID

@@ -1,8 +1,9 @@
 import { Cookies } from 'react-cookie';
-const cookies = new Cookies();
-const API_BASE = 'http://localhost:8001/api';
 
-function authHeaders() {
+const API_BASE = 'http://localhost:8001/api'; // Change to your backend URL
+const cookies = new Cookies();
+
+function getAuthHeaders() {
   const token = cookies.get('userId'); // or your actual token cookie name
   return {
     'Content-Type': 'application/json',
@@ -10,14 +11,23 @@ function authHeaders() {
   };
 }
 
+// Helper function to handle API responses
+async function handleResponse(response) {
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `HTTP error! status: ${response.status}`);
+  }
+  return await response.json();
+}
+
+// Authentication API functions
 export async function signup({ email, password, firstName }) {
   const res = await fetch(`${API_BASE}/account/create`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password, firstName }),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return await res.json();
+  return handleResponse(res);
 }
 
 export async function signin({ email, password }) {
@@ -26,48 +36,51 @@ export async function signin({ email, password }) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return await res.json();
+  return handleResponse(res);
 }
-// Conversation API
+
+// Conversation API functions
 export async function createConversation() {
   const res = await fetch(`${API_BASE}/conversation/create`, {
     method: 'POST',
-    credentials: 'include',
-    headers: authHeaders()
+    headers: getAuthHeaders(),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return await res.json(); // { message, conversation_id }
+  return handleResponse(res);
 }
 
-export async function getConversationList() {
+export async function listConversations() {
   const res = await fetch(`${API_BASE}/conversation/list`, {
     method: 'GET',
-    credentials: 'include',
-    headers: authHeaders()
+    headers: getAuthHeaders(),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return await res.json(); // { message, conversations: [...] }
+  return handleResponse(res);
 }
 
-// Message API
-export async function createMessage({ message, conversation_id }) {
+// Message API functions
+export async function createMessage(conversationId, message) {
   const res = await fetch(`${API_BASE}/message/create`, {
     method: 'POST',
-    credentials: 'include',
-    headers: authHeaders(),
-    body: JSON.stringify({ message, conversation_id })
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      conversation_id: conversationId,
+      message: message
+    }),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return await res.json(); // { message, message_id }
+  return handleResponse(res);
 }
 
-export async function getMessageList(conversation_id) {
-  const res = await fetch(`${API_BASE}/message/list?conversation_id=${encodeURIComponent(conversation_id)}`, {
+export async function listMessages(conversationId) {
+  const res = await fetch(`${API_BASE}/message/list?conversation_id=${encodeURIComponent(conversationId)}`, {
     method: 'GET',
-    credentials: 'include',
-    headers: authHeaders()
+    headers: getAuthHeaders(),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return await res.json(); // { message, messages: [...] }
+  return handleResponse(res);
 }
+
+export async function testAIConnection() {
+  const res = await fetch(`${API_BASE}/message/test-ai`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+  });
+  return handleResponse(res);
+} 

@@ -8,7 +8,7 @@ import HomepageHeaderWLogo from '../components/HomepageHeaderWLogo';
 import ChatInput from '../components/ChatInput';
 import ChatMessage from '../components/ChatMessage';
 import './ChatPageCustom.scss';
-import { createConversation, getConversationList, createMessage, getMessageList } from '../utils/api';
+import { createConversation, listConversations, createMessage, listMessages } from '../utils/api';
 
 const benefitCards = [
   {
@@ -41,20 +41,20 @@ const Chat = () => {
       setLoading(true);
       try {
         // Try to get existing conversations
-        const convoList = await getConversationList();
+        const convoList = await listConversations();
         let convoId = null;
         if (convoList.conversations && convoList.conversations.length > 0) {
           convoId = convoList.conversations[0].conversation_id;
         } else {
           // Create a new conversation if none exist
-          const created = await createConversation({});
+          const created = await createConversation();
           convoId = created.conversation_id;
         }
         setConversationId(convoId);
         console.log(convoId);
         // Fetch messages for this conversation
         if (convoId) {
-          const msgRes = await getMessageList(convoId);
+          const msgRes = await listMessages(convoId);
           setChatMessages(msgRes.messages || []);
         }
       } catch (e) {
@@ -69,9 +69,9 @@ const Chat = () => {
     if (!conversationId) return;
     setLoading(true);
     try {
-      await createMessage({ message, conversation_id: conversationId });
+      await createMessage(conversationId, message);
       // Refresh messages after sending
-      const msgRes = await getMessageList(conversationId);
+      const msgRes = await listMessages(conversationId);
       setChatMessages(msgRes.messages || []);
     } catch (e) {
       // Optionally show error

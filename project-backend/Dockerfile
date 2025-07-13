@@ -11,8 +11,8 @@ RUN sh /uv-installer.sh && rm /uv-installer.sh
 ENV PATH="/root/.local/bin:$PATH"
 
 WORKDIR /app
-COPY pyproject.toml* uv.lock* ./
-RUN uv sync --frozen
+COPY pyproject.toml ./
+RUN uv sync
 
 # Stage 2: Runtime image
 FROM python:3.12-slim AS runtime

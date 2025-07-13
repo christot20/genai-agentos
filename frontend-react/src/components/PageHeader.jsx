@@ -10,7 +10,7 @@ const PageHeader = () => {
   const navigate = useNavigate();
 
   const handleSignOut = () => {
-    removeCookie('username', { path: '/' });
+    removeCookie('userId', { path: '/' });
     window.location.reload();
   };
 

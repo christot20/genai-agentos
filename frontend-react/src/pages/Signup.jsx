@@ -19,8 +19,7 @@ const Signup = () => {
   const handleSignup = async () => {
     try {
       const result = await signup({ email, password, firstName });
-      console.log(result);
-      setCookie('username', result.firstName || result.email);
+      setCookie('userId', result.access_token);
       // Redirect or show success (example: navigate('/dashboard'))
       navigate('/chat');
     } catch (err) {
