@@ -52,7 +52,8 @@ async def list(token: HTTPAuthorizationCredentials = Depends(security), db_conn:
 
         db_curr = db_conn.cursor()
         schema = os.environ.get("POSTGRES_NAVICARE_SCHEMA")
-        table = os.environ.get("POSTGRES_CONVERSATION_TABLE")
+        conversation_table = os.environ.get("POSTGRES_CONVERSATION_TABLE")
+        message_table = os.environ.get("POSTGRES_MESSAGE_TABLE")
 
         if not validate_jwt(token, db_curr):
             return JSONResponse(status_code = status.HTTP_401_UNAUTHORIZED,
@@ -60,21 +61,45 @@ async def list(token: HTTPAuthorizationCredentials = Depends(security), db_conn:
 
         creator_id = get_uuid_from_jwt(token, db_curr)
         dbg_log(f"creator_id = {creator_id}")
-        db_curr.execute(query = f"select * from {schema}.{table} where creator_id = %s",
-                        params = (creator_id,))
+        
+        # Get conversations with their first message as description
+        query = f"""
+            SELECT 
+                c.conversation_id,
+                c.creator_id,
+                c.title,
+                c.creation_date,
+                c.updated_date,
+                COALESCE(
+                    (SELECT m.message 
+                     FROM {schema}.{message_table} m 
+                     WHERE m.conversation_id = c.conversation_id 
+                     ORDER BY m.creation_date ASC 
+                     LIMIT 1), 
+                    'No messages yet'
+                ) as first_message
+            FROM {schema}.{conversation_table} c
+            WHERE c.creator_id = %s
+            ORDER BY c.updated_date DESC
+        """
+        
+        db_curr.execute(query, params = (creator_id,))
         query_response = db_curr.fetchall()
         dbg_log(f"query_response = {query_response}")
 
         convos = []
         for row in query_response:
-            convos.append(Conversation(conversation_id = row[0],
-                                              creator_id = row[1],
-                                              title = row[2],
-                                              creation_date = row[3],
-                                              updated_date = row[4]))
+            convos.append(Conversation(
+                conversation_id = row[0],
+                creator_id = row[1],
+                title = row[2],
+                creation_date = row[3],
+                updated_date = row[4],
+                first_message = row[5]  # Add first message as description
+            ))
         dbg_log(f"conversations = {convos}")
 
-        return JSONResponse(status_code = status.HTTP_201_CREATED,
+        return JSONResponse(status_code = status.HTTP_200_OK,
                             content = jsonable_encoder(ListResponse(message = "Success",
                                                                     conversations = convos)))
     finally:

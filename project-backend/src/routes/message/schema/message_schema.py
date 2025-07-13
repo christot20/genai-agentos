@@ -14,9 +14,6 @@ class CreateResponse(BaseModel):
     message_id: uuid.UUID | None = None
     ai_response: Optional[Dict[str, Any]] = None
 
-class ListRequest(BaseModel):
-    conversation_id: uuid.UUID
-
 class Message(BaseModel):
     message_id: uuid.UUID
     sender_type: str
@@ -26,3 +23,6 @@ class Message(BaseModel):
 class ListResponse(BaseModel):
     message: str
     messages: list[Message]
+    conversation_id: Optional[uuid.UUID] = None
+    conversation_title: Optional[str] = None
+    total_messages: Optional[int] = None

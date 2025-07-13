@@ -1,6 +1,7 @@
 import uuid
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
 
 
@@ -14,6 +15,7 @@ class Conversation(BaseModel):
     title: str | None
     creation_date: datetime
     updated_date: datetime
+    first_message: Optional[str] = None
 
 class ListResponse(BaseModel):
     message: str

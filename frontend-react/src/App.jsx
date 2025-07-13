@@ -11,11 +11,11 @@ import './styles/App.scss';
 import { useCookies } from 'react-cookie';
 
 function ProtectedRoute({ children }) {
-  const [cookies] = useCookies(['username']);
-  if (!cookies.username) {
+  const [cookies] = useCookies(['userId']);
+  if (!cookies.userId) {
     return <Navigate to="/signin" replace />;
   }
-  return children;
+  return <Navigate to="/chat" replace />;
 }
 
 function App() {

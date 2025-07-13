@@ -31,7 +31,9 @@ const benefitCards = [
 const Chat = () => {
   const [chatMessages, setChatMessages] = useState([]);
   const [conversationId, setConversationId] = useState(null);
+  const [conversationTitle, setConversationTitle] = useState('');
   const [loading, setLoading] = useState(false);
+  const [conversations, setConversations] = useState([]);
   const chatEndRef = useRef(null);
   const prevMsgCount = useRef(chatMessages.length);
 
@@ -42,22 +44,29 @@ const Chat = () => {
       try {
         // Try to get existing conversations
         const convoList = await listConversations();
+        console.log('Conversations:', convoList);
+        
         let convoId = null;
         if (convoList.conversations && convoList.conversations.length > 0) {
           convoId = convoList.conversations[0].conversation_id;
+          setConversations(convoList.conversations);
         } else {
           // Create a new conversation if none exist
           const created = await createConversation();
           convoId = created.conversation_id;
         }
         setConversationId(convoId);
-        console.log(convoId);
+        console.log('Selected conversation ID:', convoId);
+        
         // Fetch messages for this conversation
         if (convoId) {
           const msgRes = await listMessages(convoId);
+          console.log('Messages response:', msgRes);
           setChatMessages(msgRes.messages || []);
+          setConversationTitle(msgRes.conversation_title || 'New Chat');
         }
       } catch (e) {
+        console.error('Error initializing conversation:', e);
         setChatMessages([]);
       }
       setLoading(false);
@@ -69,12 +78,30 @@ const Chat = () => {
     if (!conversationId) return;
     setLoading(true);
     try {
+      console.log('Sending message:', message, 'to conversation:', conversationId);
       await createMessage(conversationId, message);
+      
       // Refresh messages after sending
       const msgRes = await listMessages(conversationId);
+      console.log('Updated messages:', msgRes);
       setChatMessages(msgRes.messages || []);
+      setConversationTitle(msgRes.conversation_title || 'New Chat');
     } catch (e) {
-      // Optionally show error
+      console.error('Error sending message:', e);
+      // Optionally show error to user
+    }
+    setLoading(false);
+  };
+
+  const handleConversationSelect = async (convoId) => {
+    setLoading(true);
+    try {
+      setConversationId(convoId);
+      const msgRes = await listMessages(convoId);
+      setChatMessages(msgRes.messages || []);
+      setConversationTitle(msgRes.conversation_title || 'Chat');
+    } catch (e) {
+      console.error('Error switching conversation:', e);
     }
     setLoading(false);
   };
@@ -116,26 +143,64 @@ const Chat = () => {
           </>
         )}
         {chatActive && (
-          <div
-            className="chat-messages-scrollable"
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 0,
-              margin: '32px auto',
-              maxWidth: 760,
-              minHeight: 300,
-              maxHeight: 400,
-              overflowY: 'auto',
-              width: '100%'
-            }}
-          >
-            {chatMessages.map((msg, i) => (
-              <ChatMessage key={msg.message_id || i} from={msg.sender_type === 'User' ? 'user' : 'ai'} message={msg.message} />
-            ))}
-            {loading && <div style={{ color: '#FF535C', textAlign: 'center', margin: 8 }}>Loading...</div>}
-            <div ref={chatEndRef} />
-          </div>
+          <>
+            {/* Conversation Header */}
+            <div style={{ 
+              padding: '16px 0', 
+              borderBottom: '1px solid #e0e0e0',
+              marginBottom: '16px'
+            }}>
+              <h3 style={{ margin: 0, color: '#333' }}>
+                {conversationTitle || 'Chat'}
+              </h3>
+              {conversations.length > 1 && (
+                <div style={{ marginTop: '8px' }}>
+                  <small style={{ color: '#666' }}>Other conversations:</small>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+                    {conversations.slice(0, 3).map((conv) => (
+                      <button
+                        key={conv.conversation_id}
+                        onClick={() => handleConversationSelect(conv.conversation_id)}
+                        style={{
+                          padding: '4px 8px',
+                          fontSize: '12px',
+                          border: '1px solid #ddd',
+                          borderRadius: '4px',
+                          background: conv.conversation_id === conversationId ? '#007bff' : '#fff',
+                          color: conv.conversation_id === conversationId ? '#fff' : '#333',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {conv.first_message ? conv.first_message.substring(0, 20) + '...' : 'New Chat'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Chat Messages */}
+            <div
+              className="chat-messages-scrollable"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 0,
+                margin: '32px auto',
+                maxWidth: 760,
+                minHeight: 300,
+                maxHeight: 400,
+                overflowY: 'auto',
+                width: '100%'
+              }}
+            >
+              {chatMessages.map((msg, i) => (
+                <ChatMessage key={msg.message_id || i} from={msg.sender_type === 'User' ? 'user' : 'ai'} message={msg.message} />
+              ))}
+              {loading && <div style={{ color: '#FF535C', textAlign: 'center', margin: 8 }}>Loading...</div>}
+              <div ref={chatEndRef} />
+            </div>
+          </>
         )}
         <ChatInput placeholder="What is a good recovery program for someone just out of back surgery" onSend={handleSend} />
       </div>

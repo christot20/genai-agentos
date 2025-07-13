@@ -1,12 +1,12 @@
 import psycopg
 import os
 import uuid
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends, Query
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from src.routes.message.schema.message_schema import CreateRequest, CreateResponse, Message, ListRequest, ListResponse
+from src.routes.message.schema.message_schema import CreateRequest, CreateResponse, Message, ListResponse
 from src.routes.account.util.token import validate_jwt, get_uuid_from_jwt
 from src.logging.log import dbg_log
 from src.db.session import get_db_session
@@ -87,10 +87,11 @@ async def create(message_info: CreateRequest, token: HTTPAuthorizationCredential
         dbg_log(f"create() end")
 
 @message_router.get("/list")
-async def list(message_info: ListRequest, token: HTTPAuthorizationCredentials = Depends(security), db_conn: psycopg.Connection = Depends(get_db_session)):
+async def list(conversation_id: uuid.UUID = Query(...), token: HTTPAuthorizationCredentials = Depends(security), db_conn: psycopg.Connection = Depends(get_db_session)):
     try:
         dbg_log(f"list() begin")
         dbg_log(f"scheme = {token.scheme} | credentials = {token.credentials}")
+        dbg_log(f"conversation_id = {conversation_id}")
 
         db_curr = db_conn.cursor()
         schema = os.environ.get("POSTGRES_NAVICARE_SCHEMA")
@@ -103,8 +104,22 @@ async def list(message_info: ListRequest, token: HTTPAuthorizationCredentials = 
 
         creator_id = get_uuid_from_jwt(token, db_curr)
 
-        db_curr.execute(query = f"select m.message_id, m.sender_type, m.creation_date, m.message from {schema}.{message_table} m inner join {schema}.{conversation_table} c on m.conversation_id = c.conversation_id where c.creator_id = %s",
-                        params = (creator_id,))
+        # First verify the conversation belongs to the user
+        db_curr.execute(query = f"select conversation_id, title from {schema}.{conversation_table} where conversation_id = %s and creator_id = %s",
+                        params = (conversation_id, creator_id))
+        conversation_check = db_curr.fetchone()
+        
+        if not conversation_check:
+            return JSONResponse(status_code = status.HTTP_404_NOT_FOUND,
+                                content = jsonable_encoder(ListResponse(message = "Conversation not found", messages = [])))
+
+        # Get complete chat history for the specific conversation
+        db_curr.execute(query = f"""
+            select message_id, sender_type, creation_date, message 
+            from {schema}.{message_table} 
+            where conversation_id = %s 
+            order by creation_date asc
+        """, params = (conversation_id,))
         query_response = db_curr.fetchall()
         dbg_log(f"query_response = {query_response}")
 
@@ -114,11 +129,20 @@ async def list(message_info: ListRequest, token: HTTPAuthorizationCredentials = 
                                     sender_type = row[1],
                                     creation_date = row[2],
                                     message = row[3]))
-        dbg_log(f"conversations = {messages}")
+        dbg_log(f"messages = {messages}")
 
-        return JSONResponse(status_code = status.HTTP_201_CREATED,
-                            content = jsonable_encoder(ListResponse(message = "Success",
-                                                                    messages = messages)))
+        return JSONResponse(status_code = status.HTTP_200_OK,
+                            content = jsonable_encoder(ListResponse(
+                                message = "Chat history retrieved successfully",
+                                messages = messages,
+                                conversation_id = conversation_id,
+                                conversation_title = conversation_check[1],
+                                total_messages = len(messages)
+                            )))
+    except Exception as e:
+        dbg_log(f"Error in list(): {e}")
+        return JSONResponse(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            content = jsonable_encoder(ListResponse(message = f"Error retrieving chat history: {str(e)}", messages = [])))
     finally:
         dbg_log(f"list() end")
 
