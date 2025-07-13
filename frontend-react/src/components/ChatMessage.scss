@@ -25,10 +25,80 @@
   text-align: left;
 }
 
+// AI Reasoning message styles
+.chat-message-reasoning {
+  border: 3px solid #FFA500;
+  margin-right: auto;
+  margin-left: 0;
+  text-align: left;
+  background: #FFF8E1;
+  max-width: 600px;
+  
+  .reasoning-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #FFE082;
+    
+    .reasoning-icon {
+      font-size: 1.2rem;
+    }
+    
+    .reasoning-title {
+      font-weight: 600;
+      color: #E65100;
+      font-size: 0.95rem;
+    }
+  }
+  
+  .reasoning-content {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #424242;
+    
+    strong {
+      color: #E65100;
+      font-weight: 600;
+    }
+    
+    // Style for JSON content
+    pre {
+      background: #F5F5F5;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      margin: 4px 0;
+      border: 1px solid #E0E0E0;
+    }
+    
+    // Style for execution time
+    br + strong:contains("Execution Time") {
+      color: #1976D2;
+    }
+    
+    // Style for URLs
+    strong:contains("URL") {
+      color: #388E3C;
+    }
+  }
+}
+
 @media (max-width: 700px) {
   .chat-message {
     font-size: 0.98rem;
     padding: 12px 10px;
     max-width: 98vw;
+  }
+  
+  .chat-message-reasoning {
+    max-width: 98vw;
+    padding: 16px 12px;
+    
+    .reasoning-content {
+      font-size: 0.85rem;
+    }
   }
 } 

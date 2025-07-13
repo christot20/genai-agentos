@@ -90,7 +90,20 @@ const Chat = () => {
     
     try {
       console.log('Sending message:', message, 'to conversation:', conversationId);
-      await createMessage(conversationId, message);
+      const response = await createMessage(conversationId, message);
+      
+      // Check if we have AI response with reasoning data
+      if (response.ai_response && response.ai_response.agents_trace) {
+        // Add reasoning message to show the agent's thought process
+        const reasoningMessage = {
+          message_id: `reasoning-${Date.now()}`,
+          message: formatAgenticReasoning(response.ai_response.agents_trace),
+          sender_type: 'AI_Reasoning',
+          timestamp: new Date().toISOString()
+        };
+        
+        setChatMessages(prev => [...prev, reasoningMessage]);
+      }
       
       // Add a small delay to ensure AI response is processed
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -128,6 +141,51 @@ const Chat = () => {
       // Optionally show error to user
     }
     setLoading(false);
+  };
+
+  // Helper function to format agentic reasoning for display
+  const formatAgenticReasoning = (agentsTrace) => {
+    if (!agentsTrace || !Array.isArray(agentsTrace)) {
+      return "No reasoning data available";
+    }
+
+    let reasoningText = "🤖 **Agent Reasoning Process:**\n\n";
+    
+    agentsTrace.forEach((trace, index) => {
+      const agentName = trace.name || 'Unknown Agent';
+      const isSuccess = trace.is_success !== false;
+      const status = isSuccess ? "✅" : "❌";
+      
+      reasoningText += `${status} **${agentName}**\n`;
+      
+      if (trace.input) {
+        reasoningText += `📥 **Input:** ${JSON.stringify(trace.input, null, 2)}\n`;
+      }
+      
+      if (trace.output) {
+        if (typeof trace.output === 'string') {
+          reasoningText += `📤 **Output:** ${trace.output}\n`;
+        } else {
+          reasoningText += `📤 **Output:** ${JSON.stringify(trace.output, null, 2)}\n`;
+        }
+      }
+      
+      if (trace.execution_time) {
+        reasoningText += `⏱️ **Execution Time:** ${trace.execution_time.toFixed(2)}s\n`;
+      }
+      
+      if (trace.type) {
+        reasoningText += `🔧 **Type:** ${trace.type}\n`;
+      }
+      
+      if (trace.url) {
+        reasoningText += `🔗 **URL:** ${trace.url}\n`;
+      }
+      
+      reasoningText += "\n";
+    });
+    
+    return reasoningText;
   };
 
   const handleConversationSelect = async (convoId) => {
@@ -222,7 +280,12 @@ const Chat = () => {
               }}
             >
               {chatMessages.map((msg, i) => (
-                <ChatMessage key={msg.message_id || i} from={msg.sender_type === 'User' ? 'user' : 'ai'} message={msg.message} />
+                <ChatMessage 
+                  key={msg.message_id || i} 
+                  from={msg.sender_type === 'User' ? 'user' : 'ai'} 
+                  message={msg.message} 
+                  sender_type={msg.sender_type}
+                />
               ))}
               {loading && <div style={{ color: '#FF535C', textAlign: 'center', margin: 8 }}>Loading...</div>}
               <div ref={chatEndRef} />
