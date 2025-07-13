@@ -15,7 +15,7 @@ function ProtectedRoute({ children }) {
   if (!cookies.userId) {
     return <Navigate to="/signin" replace />;
   }
-  return <Navigate to="/chat" replace />;
+  return children;
 }
 
 function App() {

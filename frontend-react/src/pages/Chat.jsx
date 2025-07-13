@@ -81,9 +81,33 @@ const Chat = () => {
       console.log('Sending message:', message, 'to conversation:', conversationId);
       await createMessage(conversationId, message);
       
-      // Refresh messages after sending
-      const msgRes = await listMessages(conversationId);
-      console.log('Updated messages:', msgRes);
+      // Add a small delay to ensure AI response is processed
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Try to get updated messages with retries
+      let msgRes = null;
+      let retryCount = 0;
+      const maxRetries = 5;
+      
+      while (retryCount < maxRetries) {
+        msgRes = await listMessages(conversationId);
+        console.log(`Retry ${retryCount + 1}: Updated messages:`, msgRes);
+        
+        // Check if we have both user and AI messages
+        const messages = msgRes.messages || [];
+        const userMessages = messages.filter(msg => msg.sender_type === 'User');
+        const aiMessages = messages.filter(msg => msg.sender_type === 'AI');
+        
+        // If we have the same number of AI responses as user messages, we're done
+        if (aiMessages.length >= userMessages.length) {
+          break;
+        }
+        
+        // Wait a bit more and retry
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        retryCount++;
+      }
+      
       setChatMessages(msgRes.messages || []);
       setConversationTitle(msgRes.conversation_title || 'New Chat');
     } catch (e) {
