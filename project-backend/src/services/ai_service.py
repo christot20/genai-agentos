@@ -213,6 +213,7 @@ class AIService:
                 agent_response = await self._simulate_agent_response(message)
             
             dbg_log(f"send_message_to_agent() end - response: {agent_response.get('response', '')[:50]}...")
+            dbg_log(f"agents_trace: {agent_response.get('agents_trace', [])}")
             
             return {
                 "message_id": request_id,
@@ -237,11 +238,9 @@ class AIService:
             raise Exception("No JWT token available")
             
         try:
-            # Generate a unique session_id for this websocket connection to avoid conflicts
-            unique_session_id = str(uuid4())
-            
-            # Connect to the provided backend's WebSocket endpoint
-            uri = f"{self.provided_backend_ws_url}?token={self.jwt_token}&session_id={unique_session_id}"
+            # Use the provided session_id to maintain chat context
+            # Don't generate a unique session_id as it breaks chat history
+            uri = f"{self.provided_backend_ws_url}?token={self.jwt_token}&session_id={session_id}"
             dbg_log(f"Connecting to websocket: {uri}")
             
             async with websockets.connect(uri) as websocket:
@@ -286,18 +285,27 @@ class AIService:
                     if response_data and "type" in response_data and response_data["type"] == "agent_response":
                         if "response" in response_data:
                             agent_response = response_data["response"]
-                            # The actual response text is in agent_response["response"]
+                            dbg_log(f"Full agent response: {agent_response}")
+                            
+                            # Extract the response text
                             if isinstance(agent_response.get("response"), dict):
                                 # If response is a dict, extract the text from it
                                 response_text = agent_response["response"].get("response", "No response text")
+                                # Also extract agents_trace from the nested response
+                                agents_trace = agent_response["response"].get("agents_trace", [])
                             else:
                                 # If response is a string, use it directly
                                 response_text = agent_response.get("response", "No response")
+                                # Try to get agents_trace from the top level
+                                agents_trace = agent_response.get("agents_trace", [])
+                            
+                            dbg_log(f"Extracted response_text: {response_text}")
+                            dbg_log(f"Extracted agents_trace: {agents_trace}")
                             
                             return {
                                 "response": response_text,
                                 "is_success": True,
-                                "agents_trace": agent_response.get("agents_trace", [])
+                                "agents_trace": agents_trace
                             }
                         else:
                             return {

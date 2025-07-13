@@ -251,11 +251,26 @@ async def handle_frontend_ws(
                     client_id=MasterServerName.MASTER_SERVER_ML.value,
                     message=req_body,
                 )
+                
+                # Extract agents_trace from the master agent response
+                agents_trace = []
+                if hasattr(response, 'response') and isinstance(response.response, dict):
+                    agents_trace = response.response.get('agents_trace', [])
+                elif isinstance(response.response, str):
+                    # If response is a string, try to parse it as JSON
+                    try:
+                        import json
+                        parsed_response = json.loads(response.response)
+                        agents_trace = parsed_response.get('agents_trace', [])
+                    except (json.JSONDecodeError, AttributeError):
+                        agents_trace = []
+                
                 agent_response = AgentResponseDTO(
                     execution_time=response.execution_time,
                     response=response.response,
                     request_id=request_id,
                     session_id=session_id,
+                    agents_trace=agents_trace,
                 )
                 await chat_repo.add_message_to_conversation(
                     db=db,
