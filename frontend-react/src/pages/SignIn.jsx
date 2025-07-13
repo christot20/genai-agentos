@@ -18,9 +18,10 @@ const Signin = () => {
   const handleSignin = async () => {
     try {
       const result = await signin({ email, password });
+      console.log(result);
       setCookie('userId', result.access_token);
       // Redirect or show success (example: navigate('/dashboard'))
-      navigate('/dashboard');
+      navigate('/chat');
     } catch (err) {
       setError(err.message || 'Sign in failed');
     }

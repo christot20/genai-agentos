@@ -19,9 +19,10 @@ const Signup = () => {
   const handleSignup = async () => {
     try {
       const result = await signup({ email, password, firstName });
+      console.log(result);
       setCookie('username', result.firstName || result.email);
       // Redirect or show success (example: navigate('/dashboard'))
-      navigate('/dashboard');
+      navigate('/chat');
     } catch (err) {
       setError(err.message || 'Sign up failed');
     }
