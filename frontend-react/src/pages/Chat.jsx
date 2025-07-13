@@ -8,7 +8,7 @@ import HomepageHeaderWLogo from '../components/HomepageHeaderWLogo';
 import ChatInput from '../components/ChatInput';
 import ChatMessage from '../components/ChatMessage';
 import './ChatPageCustom.scss';
-import { getConversationHistory, sendMessage, openAgentStatusSocket } from '../utils/api';
+import { createConversation, getConversationList, createMessage, getMessageList } from '../utils/api';
 
 const benefitCards = [
   {
@@ -30,32 +30,48 @@ const benefitCards = [
 
 const Chat = () => {
   const [chatMessages, setChatMessages] = useState([]);
-  const [agentStatus, setAgentStatus] = useState('idle');
+  const [conversationId, setConversationId] = useState(null);
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef(null);
   const prevMsgCount = useRef(chatMessages.length);
-  const wsRef = useRef(null);
 
+  // On mount, get or create a conversation, then fetch messages
   useEffect(() => {
-    // Fetch conversation history on mount
-    getConversationHistory().then(setChatMessages).catch(() => setChatMessages([]));
-    // Open websocket for agent status
-    wsRef.current = openAgentStatusSocket((status) => setAgentStatus(status.status));
-    return () => {
-      if (wsRef.current) wsRef.current.close();
-    };
+    async function initConversation() {
+      setLoading(true);
+      try {
+        // Try to get existing conversations
+        const convoList = await getConversationList();
+        let convoId = null;
+        if (convoList.conversations && convoList.conversations.length > 0) {
+          convoId = convoList.conversations[0].conversation_id;
+        } else {
+          // Create a new conversation if none exist
+          const created = await createConversation({});
+          convoId = created.conversation_id;
+        }
+        setConversationId(convoId);
+        // Fetch messages for this conversation
+        if (convoId) {
+          const msgRes = await getMessageList(convoId);
+          setChatMessages(msgRes.messages || []);
+        }
+      } catch (e) {
+        setChatMessages([]);
+      }
+      setLoading(false);
+    }
+    initConversation();
   }, []);
 
   const handleSend = async (message) => {
+    if (!conversationId) return;
     setLoading(true);
     try {
-      const res = await sendMessage(message);
-      // Assume API returns the updated conversation
-      if (Array.isArray(res)) {
-        setChatMessages(res);
-      } else if (res && res.message) {
-        setChatMessages(prev => [...prev, res]);
-      }
+      await createMessage({ message, conversation_id: conversationId });
+      // Refresh messages after sending
+      const msgRes = await getMessageList(conversationId);
+      setChatMessages(msgRes.messages || []);
     } catch (e) {
       // Optionally show error
     }
@@ -114,10 +130,9 @@ const Chat = () => {
             }}
           >
             {chatMessages.map((msg, i) => (
-              <ChatMessage key={i} from={msg.from} message={msg.message} />
+              <ChatMessage key={msg.message_id || i} from={msg.sender_type === 'User' ? 'user' : 'ai'} message={msg.message} />
             ))}
-            {loading && <div style={{ color: '#FF535C', textAlign: 'center', margin: 8 }}>Sending...</div>}
-            {agentStatus === 'processing' && <div style={{ color: '#2B8AC6', textAlign: 'center', margin: 8 }}>Agent is processing...</div>}
+            {loading && <div style={{ color: '#FF535C', textAlign: 'center', margin: 8 }}>Loading...</div>}
             <div ref={chatEndRef} />
           </div>
         )}
