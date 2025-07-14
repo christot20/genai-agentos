@@ -3,13 +3,21 @@ import pandas as pd
 from typing import Annotated
 from genai_session.session import GenAISession
 from genai_session.utils.context import GenAIContext
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import OpenAIEmbeddings
+from dotenv import load_dotenv
 
 AGENT_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4Y2ExNjY0NS05YzM3LTRiYTYtOGVmYS1kZDE4NDY3ZDYyM2EiLCJleHAiOjI1MzQwMjMwMDc5OSwidXNlcl9pZCI6IjI5OGU3MTUzLWU4NzMtNDBkZC1iZWI1LWI1ZmIzMWMyYTgwZSJ9.3eP49pVW3xCdzOsqUtJv7UVON-Lf1KLpSvl8UaqM50A" # noqa: E501
 session = GenAISession(jwt_token=AGENT_JWT)
 
-# Load doctor data
-DOCTOR_CSV_PATH = "../../../agent_data/data/practitioners.csv"
-df = pd.read_csv(DOCTOR_CSV_PATH)
+load_dotenv()
+
+# Load Employee data
+CHROMA_PATH = "../../../chroma_db"
+
+embeddings = OpenAIEmbeddings()
+vectordb = Chroma(persist_directory=CHROMA_PATH, embedding_function=embeddings)
+retriever = vectordb.as_retriever(search_type="similarity", search_kwargs={"k": 10})  # get top 10 docs
 
 
 @session.bind(
@@ -23,49 +31,24 @@ async def doctor_recommender(
         "User request describing doctor need (e.g. 'I need a cardiologist in NYC' or 'Tell me about Dr. Patel' or 'I'd like a screening for diabetes')"
     ],
 ):
-    query = user_query.lower()
-    filtered_df = df.copy()
+    agent_context.logger.info("Inside doctor_recommender")
 
-    # Match by doctor name
-    name_match = df[df["last_name"].str.lower().apply(lambda x: x in query)]
-    if not name_match.empty:
-        row = name_match.iloc[0]
-        return (
-            f"Dr. {row['first_name']} {row['last_name']} is a specialist in {row['specialization']} "
-            f"in {row['metro_area']} at {row['office_address']} ({row['office_zip_code']}).\n"
-            f"Services: {row['services']}"
-        )
+    # Use retriever to get semantically relevant documents
+    docs = retriever.get_relevant_documents(user_query)
 
-    # Match services
-    service_keywords = [word for word in query.split()]
-    filtered_df = filtered_df[filtered_df["services"].str.lower().apply(
-        lambda s: any(word in s for word in service_keywords)
-    )]
+    if not docs:
+        return "Sorry, I couldn't find any doctors matching your request."
 
-    # Match specialization
-    specialization_match = df["specialization"].str.lower().apply(lambda x: x in query)
-    if specialization_match.any():
-        specializations = df[specialization_match]["specialization"].str.lower().unique()
-        filtered_df = filtered_df[filtered_df["specialization"].str.lower().isin(specializations)]
+    results = []
+    for doc in docs:
+        content = doc.page_content
+        # Optional: you can add lightweight filtering on content based on query here if needed
+        results.append(content)
 
-    # Match location
-    location_keywords = [str(z).lower() for z in df["office_zip_code"].unique()] + df["metro_area"].str.lower().unique().tolist()
-    matched_locations = [word for word in location_keywords if word in query]
-    if matched_locations:
-        filtered_df = filtered_df[
-            filtered_df["metro_area"].str.lower().isin(matched_locations) |
-            filtered_df["office_zip_code"].astype(str).str.lower().isin(matched_locations)
-        ]
+    # Limit results to a max number (like 5)
+    results = results[:5]
 
-    if filtered_df.empty:
-        return "Sorry, I couldn't find any doctors matching your full request."
-
-    results = [
-        f"Dr. {row['first_name']} {row['last_name']} ({row['specialization']}) - {row['office_address']}, {row['office_zip_code']}\nServices: {row['services']}"
-        for _, row in filtered_df.iterrows()
-    ]
-
-    return "Here are doctors matching your request:\n" + "\n\n".join(results)
+    return "Here are doctors matching your request:\n\n" + "\n\n".join(results)
 
 
 async def main():

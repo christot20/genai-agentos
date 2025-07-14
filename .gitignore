@@ -266,3 +266,4 @@ report.html
 
 tests/test_files
 /agents
+chroma_db/

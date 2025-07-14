@@ -1,21 +1,26 @@
 import asyncio
-import pandas as pd
-import re
-from dateutil.parser import parse as date_parse
 from typing import Annotated
 from genai_session.session import GenAISession
 from genai_session.utils.context import GenAIContext
+from langchain_community.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+import re
+from dateutil.parser import parse as date_parse
+from dotenv import load_dotenv
+
 
 AGENT_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhMTQ0ZWNhNi0yYTk4LTQyOGMtYjc0ZS1iNjk4YzEyY2JjMjUiLCJleHAiOjI1MzQwMjMwMDc5OSwidXNlcl9pZCI6IjI5OGU3MTUzLWU4NzMtNDBkZC1iZWI1LWI1ZmIzMWMyYTgwZSJ9.AXZjEZQmzpvg40DMSYkUQw1QQSSzj2Elv2CKKl6V5BA" # noqa: E501
 session = GenAISession(jwt_token=AGENT_JWT)
 
-# Load schedule data
-SCHEDULE_CSV_PATH = "../../../agent_data/data/schedules.csv"
-df = pd.read_csv(SCHEDULE_CSV_PATH)
+load_dotenv()
 
-# Convert appointment_date to datetime for easier handling
-df["appointment_date"] = pd.to_datetime(df["appointment_date"], errors="coerce")
+# Load Employee data
+CHROMA_PATH = "../../../chroma_db"  # or wherever you saved it
 
+# Initialize Chroma vectorstore & retriever once (outside handler)
+embeddings = OpenAIEmbeddings()
+vectordb = Chroma(persist_directory=CHROMA_PATH, embedding_function=embeddings)
+retriever = vectordb.as_retriever(search_type="similarity", search_kwargs={"k": 10})  # tweak k as needed
 
 @session.bind(
     name="doctor_scheduler",
@@ -28,55 +33,30 @@ async def doctor_scheduler(
         "User request describing a desired appointment, such as 'Book a dermatologist for June 18', 'Do you have Dr. Wu available this Friday?', or 'I need a follow-up on 2024-07-22 at 10am'"
     ],
 ):
-    query = user_query.lower()
-    filtered_df = df[df["availability_status"].str.lower() == "available"]
+    agent_context.logger.info("Inside doctor_scheduler")
 
-    # Match doctor name
-    name_filtered = filtered_df[
-        filtered_df["last_name"].str.lower().apply(lambda x: x in query)
-    ]
-    if not name_filtered.empty:
-        filtered_df = name_filtered
+    # Retrieve top relevant docs from Chroma based on user query
+    docs = retriever.get_relevant_documents(user_query)
 
-    # Match specialization
-    specialization_filtered = filtered_df[
-        filtered_df["specialization"].str.lower().apply(lambda x: x in query)
-    ]
-    if not specialization_filtered.empty:
-        filtered_df = specialization_filtered
+    # Filter available appointments from retrieved docs
+    available_appointments = []
+    for doc in docs:
+        # doc.page_content is a string like:
+        # "doctor_id: 1 | first_name: John | last_name: Wu | specialization: Dermatology | appointment_date: 2024-07-18 | appointment_time: 10:00 AM | appointment_type: follow-up | availability_status: available"
+        content = doc.page_content.lower()
 
-    # Match appointment type
-    type_filtered = filtered_df[
-        filtered_df["appointment_type"].str.lower().apply(lambda x: x in query)
-    ]
-    if not type_filtered.empty:
-        filtered_df = type_filtered
+        if "availability_status: available" not in content:
+            continue
 
-    # Match date and/or time if any
+        # Check if user query terms match this appointment record (name, specialization, date, time, type)
+        if any(term in content for term in user_query.lower().split()):
+            available_appointments.append(doc.page_content)
 
-    date_match = re.search(r"\b(?:on\s+)?(\d{4}-\d{2}-\d{2})\b", query)
-    time_match = re.search(r"\b(\d{1,2}(:\d{2})?\s*(am|pm)?)\b", query)
-
-    if date_match:
-        try:
-            date_obj = date_parse(date_match.group(1)).date()
-            filtered_df = filtered_df[filtered_df["appointment_date"].dt.date == date_obj]
-        except Exception:
-            pass
-
-    if time_match:
-        time_str = time_match.group(1)
-        filtered_df = filtered_df[filtered_df["appointment_time"].str.contains(time_str, case=False, na=False)]
-
-    if filtered_df.empty:
+    if not available_appointments:
         return "Sorry, no available appointments match your request."
 
-    results = [
-        f"Dr. {row['first_name']} {row['last_name']} ({row['specialization']}) — {row['appointment_date'].date()} at {row['appointment_time']} for {row['appointment_type']}"
-        for _, row in filtered_df.iterrows()
-    ]
-
-    return "Available appointments:\n" + "\n".join(results[:5])  # Return up to 5 options
+    # Return top 5 matching appointments (you can parse nicer if you want)
+    return "Available appointments:\n" + "\n".join(available_appointments[:5])
 
 
 async def main():
