@@ -27,7 +27,7 @@ const Signin = () => {
   };
 
   return (
-    <div className='homepage-container'>
+    <div className='homepage-container'style={{paddingLeft:"82px", marginTop:"110px"}}>
       <HomepageHeaderWLogo headerText="Sign into Navicare" logo={logo} logoAltText="GenAI AgentOS Logo" caption="Please sign in using your existing email and password  or create a new account." />
       <InputWLabel label="Username" type="email" placeholder="Email" value={email} onChange={setEmail} id="email" />
       <InputWLabel label="Password" type="password" placeholder="Password" value={password} onChange={setPassword} id="password" />

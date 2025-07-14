@@ -10,7 +10,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <div className='homepage-container'>
+    <div className='homepage-container' style={{paddingLeft:"82px", marginTop:"110px"}}>
       <HomepageHeaderWLogo 
         headerText="Navicare Your Agentic Health Assistant" 
         logo={logo} 

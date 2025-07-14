@@ -27,7 +27,7 @@ const IntakeProcess = () => {
     };
 
     return (
-        <div className='homepage-container'>
+        <div className='homepage-container'style={{paddingLeft:"84px", marginTop:"120px"}}>
             <HomepageHeaderWLogo headerText="Intake Process" logo={logo} logoAltText="GenAI AgentOS Logo" caption="Upload your insurance benefits so we can make suggestions based on insurance benefits." />
             <UploadDocument
                 text="Drag and drop to upload employer benefit documents in txt, pdf format under 10MB"

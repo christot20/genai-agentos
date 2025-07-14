@@ -8,12 +8,19 @@
   max-width: 240px;
   min-width: 160px;
   min-height: 220px;
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
   transition: box-shadow 0.2s;
+  margin-top:24px;
+  margin-bottom:24px;
 }
-
+.benefit-card:not(:has(.benefit-card-icon-circle)){
+  
+}
+.benefit-card:not(:first-child):not(:last-child){
+  margin-inline:2rem;
+}
 .benefit-card-icon-circle {
   background: #FF535C;
   border-radius: 50%;
