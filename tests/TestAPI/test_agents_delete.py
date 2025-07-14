@@ -31,7 +31,7 @@ async def test_agents_delete_active_agent(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {agent_id} started")
+        # log.info(f"Agent with ID {agent_id} started")
         await session.process_events()
 
     try:
@@ -80,7 +80,7 @@ async def test_agents_delete_agent_using_invalid_agent_id(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {agent_id} started")
+        # log.info(f"Agent with ID {agent_id} started")
         await session.process_events()
 
     try:
@@ -129,7 +129,7 @@ async def test_agents_delete_agent_using_wrong_agent_id(
 
     async def process_events():
         """Processes events for the GenAISession."""
-        # logging.info(f"Agent with ID {agent_id} started")
+        # log.info(f"Agent with ID {agent_id} started")
         await session.process_events()
 
     try:

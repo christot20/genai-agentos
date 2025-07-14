@@ -18,7 +18,7 @@ This repository provides the complete infrastructure for running GenAI agents, i
 ## 🛠️ Readme Files
 
 * [CLI](cli/README.md)
-* [Backend](backend/README.md)
+* [Backend](provided-backend/README.md)
 * [Master Agents](master-agent/README.md)
 * [Router](router/README.md)
 * [Frontend](frontend/README.md)

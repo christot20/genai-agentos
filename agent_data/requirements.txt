@@ -1,2 +1,8 @@
 faker
 pandas
+langchain
+langchain-community
+openai
+python-dotenv
+chromadb
+tiktoken

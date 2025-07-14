@@ -91,7 +91,7 @@ class AsyncHTTPClient:
 
                 if response.headers.get("Content-Type", "") in ["application/json"]:
                     response_json = await response.json()
-                    # logging.info(f"Response: {response_json}")
+                    # log.info(f"Response: {response_json}")
                     return response_json
 
                 elif response.headers.get("Content-Type", "") in [
@@ -106,12 +106,12 @@ class AsyncHTTPClient:
                     "video/mp4",
                 ]:
                     data = await response.read()
-                    # logging.info(f"Response: {data}")
+                    # log.info(f"Response: {data}")
                     return data
 
                 else:
                     text = await response.text()
-                    # logging.info(f"Response: {text}")
+                    # log.info(f"Response: {text}")
                     return text
 
     async def post(
@@ -146,7 +146,7 @@ class AsyncHTTPClient:
             merged_headers.update(headers)
         req_timeout = timeout if timeout is not None else self.timeout
 
-        # logging.info(f"Sending 'POST' to {url} with following json: {json}")
+        # log.info(f"Sending 'POST' to {url} with following json: {json}")
 
         async with aiohttp.ClientSession() as session:
             post_info = dict(
@@ -155,7 +155,7 @@ class AsyncHTTPClient:
                 json=json,
                 headers=merged_headers,
             )
-            # logging.info(f"Sending 'POST': {post_info}")
+            # log.info(f"Sending 'POST': {post_info}")
 
             async with session.post(
                 url,
@@ -299,7 +299,7 @@ class AsyncHTTPClient:
                     response.raise_for_status()
 
                 response_json = await response.json()
-                # logging.info(f"Response: {response_json}")
+                # log.info(f"Response: {response_json}")
                 return response_json
 
     async def upload_file(

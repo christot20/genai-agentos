@@ -73,7 +73,7 @@ async def test_agents_register_inactive_agent(
 
 #     async def process_events():
 #         """Processes events for the GenAISession."""
-#         # logging.info(f"Agent with ID {JWT_TOKEN} started")
+#         # log.info(f"Agent with ID {JWT_TOKEN} started")
 #         await session.process_events()
 
 #     try:
@@ -119,7 +119,7 @@ async def test_agents_register_inactive_agent(
 #             await event_task
 
 #         except asyncio.CancelledError:
-#             logging.info("Background task has been properly cancelled.")
+#             log.info("Background task has been properly cancelled.")
 
 
 @pytest.mark.asyncio
