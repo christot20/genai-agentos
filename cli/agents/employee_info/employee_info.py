@@ -6,8 +6,10 @@ from genai_session.session import GenAISession
 from genai_session.utils.context import GenAIContext
 from dotenv import load_dotenv
 
-AGENT_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZTk1NzQzOS02ZTBkLTRhZTgtYTA5Yi01MzlhM2ZkMDkxNWYiLCJleHAiOjI1MzQwMjMwMDc5OSwidXNlcl9pZCI6IjVjZTQ1NjRhLWQ2N2YtNDFjYi1iNGFkLTk0NDE2NWUzMjcyZiJ9.sSI5pqZLKRLKTcqk5j0Gjc1bVWDp2TNzziL1gU_iXFk" # noqa: E501
+AGENT_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MDFmZGE3NC01OWEwLTQ3YjAtOTJhNC1hZTMzMmRhMmM3OTEiLCJleHAiOjI1MzQwMjMwMDc5OSwidXNlcl9pZCI6IjkxNWI1Nzg4LWNhMWMtNDk5NS1iYmY0LWU1NmJhZTI2MWNjYSJ9.iUGMW1jBQ_utT_CyeDb-brAwj1sjOBG9_oEDSvFbwwo" # noqa: E501
 session = GenAISession(jwt_token=AGENT_JWT)
+
+
 
 
 load_dotenv()
@@ -57,3 +59,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
