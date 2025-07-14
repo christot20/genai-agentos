@@ -8,7 +8,8 @@ import HomepageHeaderWLogo from '../components/HomepageHeaderWLogo';
 import ChatInput from '../components/ChatInput';
 import ChatMessage from '../components/ChatMessage';
 import './ChatPageCustom.scss';
-import { createConversation, listConversations, createMessage, listMessages } from '../utils/api';
+import { createConversation, listConversations, listMessages } from '../utils/api';
+import websocketService from '../utils/websocketService';
 
 const benefitCards = [
   {
@@ -48,12 +49,12 @@ const Chat = () => {
         
         let convoId = null;
         if (convoList.conversations && convoList.conversations.length > 0) {
-          convoId = convoList.conversations[0].conversation_id;
+          convoId = convoList.conversations[0].session_id; // provided-backend uses session_id
           setConversations(convoList.conversations);
         } else {
           // Create a new conversation if none exist
           const created = await createConversation();
-          convoId = created.conversation_id;
+          convoId = created.session_id; // provided-backend uses session_id
         }
         setConversationId(convoId);
         console.log('Selected conversation ID:', convoId);
@@ -62,8 +63,30 @@ const Chat = () => {
         if (convoId) {
           const msgRes = await listMessages(convoId);
           console.log('Messages response:', msgRes);
-          setChatMessages(msgRes.messages || []);
-          setConversationTitle(msgRes.conversation_title || 'New Chat');
+          // provided-backend returns paginated results with items array
+          // Map the backend message format to frontend format
+          const mappedMessages = (msgRes.items || []).map(msg => ({
+            message_id: msg.request_id,
+            message: msg.content,
+            sender_type: msg.sender_type === 'user' ? 'User' : 'AI', // Map backend enum to frontend format
+            timestamp: msg.created_at
+          }));
+          setChatMessages(mappedMessages);
+          // For now, use a default title since the backend doesn't return conversation_title
+          setConversationTitle('Chat');
+        }
+
+        // Connect to WebSocket with the conversation ID
+        if (convoId) {
+          try {
+            websocketService.connect(convoId);
+            
+            // Add message handler for WebSocket responses
+            websocketService.addMessageHandler(handleWebSocketMessage);
+          } catch (error) {
+            console.error('Failed to connect to WebSocket:', error);
+            // Continue without WebSocket - user can still send messages but won't get real-time responses
+          }
         }
       } catch (e) {
         console.error('Error initializing conversation:', e);
@@ -72,58 +95,140 @@ const Chat = () => {
       setLoading(false);
     }
     initConversation();
+
+    // Cleanup WebSocket connection on unmount
+    return () => {
+      websocketService.removeMessageHandler(handleWebSocketMessage);
+      websocketService.disconnect();
+    };
   }, []);
+
+  // Handle WebSocket messages from the backend
+  const handleWebSocketMessage = (data) => {
+    console.log('WebSocket message received:', data);
+    
+    if (data.type === 'agent_response' && data.response) {
+      const response = data.response;
+      
+      // Add AI response to chat
+      let messageContent = '';
+      
+      // Extract the actual response text from the nested structure
+      if (typeof response.response === 'string') {
+        messageContent = response.response;
+      } else if (typeof response.response === 'object' && response.response !== null) {
+        // If response is an object, try to extract the content
+        if (response.response.content) {
+          messageContent = response.response.content;
+        } else if (response.response.response) {
+          messageContent = response.response.response;
+        } else {
+          // Fallback: stringify the response object
+          messageContent = JSON.stringify(response.response);
+        }
+      } else {
+        messageContent = String(response.response);
+      }
+      
+      const aiMessage = {
+        message_id: response.request_id || `ai-${Date.now()}`,
+        message: messageContent,
+        sender_type: 'AI', // WebSocket responses are always from AI
+        timestamp: new Date().toISOString()
+      };
+      
+      setChatMessages(prev => [...prev, aiMessage]);
+      setLoading(false);
+    } else if (data.error) {
+      console.error('WebSocket error:', data.error);
+      setLoading(false);
+    } else {
+      console.log('Unknown WebSocket message format:', data);
+    }
+  };
 
   const handleSend = async (message) => {
     if (!conversationId) return;
+    
+    // Immediately add user message to the chat
+    const userMessage = {
+      message_id: `temp-${Date.now()}`,
+      message: message,
+      sender_type: 'User', // Frontend uses 'User', backend uses 'user'
+      timestamp: new Date().toISOString()
+    };
+    
+    setChatMessages(prev => [...prev, userMessage]);
     setLoading(true);
+    
     try {
-      console.log('Sending message:', message, 'to conversation:', conversationId);
-      await createMessage(conversationId, message);
+      console.log('Sending message via WebSocket:', message);
       
-      // Add a small delay to ensure AI response is processed
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Try to get updated messages with retries
-      let msgRes = null;
-      let retryCount = 0;
-      const maxRetries = 5;
-      
-      while (retryCount < maxRetries) {
-        msgRes = await listMessages(conversationId);
-        console.log(`Retry ${retryCount + 1}: Updated messages:`, msgRes);
+      // Send message via WebSocket
+      try {
+        websocketService.sendMessage(
+          message,
+          'genai', // provider - default provider created by backend
+          'default', // llm_name - default config created by backend
+          [] // files array
+        );
         
-        // Check if we have both user and AI messages
-        const messages = msgRes.messages || [];
-        const userMessages = messages.filter(msg => msg.sender_type === 'User');
-        const aiMessages = messages.filter(msg => msg.sender_type === 'AI');
-        
-        // If we have the same number of AI responses as user messages, we're done
-        if (aiMessages.length >= userMessages.length) {
-          break;
-        }
-        
-        // Wait a bit more and retry
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        retryCount++;
+        // The AI response will be handled by the WebSocket message handler
+        // No need to poll for messages since WebSocket provides real-time updates
+      } catch (error) {
+        console.error('Failed to send message via WebSocket:', error);
+        // Fallback: try to poll for messages after a delay
+        setTimeout(async () => {
+          try {
+            const msgRes = await listMessages(conversationId);
+            // Map the backend message format to frontend format
+            const mappedMessages = (msgRes.items || []).map(msg => ({
+              message_id: msg.request_id,
+              message: msg.content,
+              sender_type: msg.sender_type === 'user' ? 'User' : 'AI', // Map backend enum to frontend format
+              timestamp: msg.created_at
+            }));
+            setChatMessages(mappedMessages);
+            setLoading(false);
+          } catch (pollError) {
+            console.error('Failed to poll for messages:', pollError);
+            setLoading(false);
+          }
+        }, 2000);
       }
       
-      setChatMessages(msgRes.messages || []);
-      setConversationTitle(msgRes.conversation_title || 'New Chat');
     } catch (e) {
       console.error('Error sending message:', e);
-      // Optionally show error to user
+      // Remove the temporary user message if there was an error
+      setChatMessages(prev => prev.filter(msg => msg.message_id !== userMessage.message_id));
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleConversationSelect = async (convoId) => {
     setLoading(true);
     try {
+      // Disconnect current WebSocket connection
+      websocketService.disconnect();
+      
       setConversationId(convoId);
       const msgRes = await listMessages(convoId);
-      setChatMessages(msgRes.messages || []);
-      setConversationTitle(msgRes.conversation_title || 'Chat');
+      // Map the backend message format to frontend format
+      const mappedMessages = (msgRes.items || []).map(msg => ({
+        message_id: msg.request_id,
+        message: msg.content,
+        sender_type: msg.sender_type === 'user' ? 'User' : 'AI', // Map backend enum to frontend format
+        timestamp: msg.created_at
+      }));
+      setChatMessages(mappedMessages);
+      setConversationTitle('Chat');
+      
+      // Connect to WebSocket with the new conversation ID
+      try {
+        websocketService.connect(convoId);
+      } catch (error) {
+        console.error('Failed to connect to WebSocket for new conversation:', error);
+      }
     } catch (e) {
       console.error('Error switching conversation:', e);
     }
@@ -168,40 +273,30 @@ const Chat = () => {
         )}
         {chatActive && (
           <>
-            {/* Conversation Header */}
-            <div style={{ 
-              padding: '16px 0', 
-              borderBottom: '1px solid #e0e0e0',
-              marginBottom: '16px'
-            }}>
-              <h3 style={{ margin: 0, color: '#333' }}>
-                {conversationTitle || 'Chat'}
-              </h3>
               {conversations.length > 1 && (
                 <div style={{ marginTop: '8px' }}>
                   <small style={{ color: '#666' }}>Other conversations:</small>
                   <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
                     {conversations.slice(0, 3).map((conv) => (
                       <button
-                        key={conv.conversation_id}
-                        onClick={() => handleConversationSelect(conv.conversation_id)}
+                        key={conv.session_id}
+                        onClick={() => handleConversationSelect(conv.session_id)}
                         style={{
                           padding: '4px 8px',
                           fontSize: '12px',
                           border: '1px solid #ddd',
                           borderRadius: '4px',
-                          background: conv.conversation_id === conversationId ? '#007bff' : '#fff',
-                          color: conv.conversation_id === conversationId ? '#fff' : '#333',
+                          background: conv.session_id === conversationId ? '#007bff' : '#fff',
+                          color: conv.session_id === conversationId ? '#fff' : '#333',
                           cursor: 'pointer'
                         }}
                       >
-                        {conv.first_message ? conv.first_message.substring(0, 20) + '...' : 'New Chat'}
+                        {conv.title ? conv.title.substring(0, 20) + '...' : 'New Chat'}
                       </button>
                     ))}
                   </div>
                 </div>
               )}
-            </div>
             
             {/* Chat Messages */}
             <div
@@ -219,9 +314,13 @@ const Chat = () => {
               }}
             >
               {chatMessages.map((msg, i) => (
-                <ChatMessage key={msg.message_id || i} from={msg.sender_type === 'User' ? 'user' : 'ai'} message={msg.message} />
+                <ChatMessage 
+                  key={msg.message_id || i} 
+                  from={msg.sender_type === 'User' ? 'user' : 'ai'} 
+                  message={msg.message} 
+                  sender_type={msg.sender_type}
+                />
               ))}
-              {loading && <div style={{ color: '#FF535C', textAlign: 'center', margin: 8 }}>Loading...</div>}
               <div ref={chatEndRef} />
             </div>
           </>

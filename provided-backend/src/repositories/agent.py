@@ -123,7 +123,7 @@ class AgentRepository(CRUDBase[Agent, AgentCreate, AgentUpdate]):
         self, db: AsyncSession, user_model: User, offset: int = 0, limit: int = 100
     ) -> list[Agent]:
         """
-        Get all agents that were registered in the provided-backend.
+        Get all agents that were registered in the backend.
 
         Args:
             db: The database session.
@@ -211,7 +211,7 @@ class AgentRepository(CRUDBase[Agent, AgentCreate, AgentUpdate]):
 
     async def set_all_agents_inactive(self, db: AsyncSession) -> None:
         """
-        Set is_active=False for all agents in the database on startup of the provided-backend
+        Set is_active=False for all agents in the database on startup of the backend
 
         Args:
             db: The database session.

@@ -55,23 +55,6 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  project-backend:
-    container_name: genai-project-backend
-    build:
-      context: project-backend
-    ports:
-      - "8001:8001"
-    env_file: .env
-    networks:
-      - local-genai-network
-    restart: unless-stopped
-    depends_on:
-      - provided-backend
-    volumes:
-      - shared-files-volume:${DEFAULT_FILES_FOLDER_NAME:-/files}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
   postgres:
     container_name: genai-postgres
     build:
