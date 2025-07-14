@@ -252,7 +252,7 @@ const Chat = () => {
   return (
     <div style={{ display: 'flex' }}>
       <ChatModal />
-      <div style={{ flex: 1, paddingLeft: 24 }}>
+      <div style={{ flex: 1, paddingLeft: 24, marginTop:"24px" }}>
         <PageHeader />
         {!chatActive && (
           <>
@@ -308,7 +308,7 @@ const Chat = () => {
                 margin: '32px auto',
                 maxWidth: 760,
                 minHeight: 300,
-                maxHeight: 400,
+                maxHeight: '60dvh',
                 overflowY: 'auto',
                 width: '100%'
               }}
