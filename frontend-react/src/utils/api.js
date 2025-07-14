@@ -128,4 +128,47 @@ export function createWebSocketConnection(sessionId = null) {
     : `ws://localhost:8000/frontend/ws?token=${token}`;
     
   return new WebSocket(wsUrl);
+}
+
+// Agent Flow API functions
+export async function getAgentFlows() {
+  const res = await fetch(`${API_BASE}/agentflows/`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  return handleResponse(res);
+}
+
+export async function getAgentFlow(id) {
+  const res = await fetch(`${API_BASE}/agentflows/${id}`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  return handleResponse(res);
+}
+
+export async function createAgentFlow(flow) {
+  const res = await fetch(`${API_BASE}/agentflows/register`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(flow),
+  });
+  return handleResponse(res);
+}
+
+export async function updateAgentFlow(id, flow) {
+  const res = await fetch(`${API_BASE}/agentflows/${id}`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(flow),
+  });
+  return handleResponse(res);
+}
+
+export async function deleteAgentFlow(id) {
+  const res = await fetch(`${API_BASE}/agentflows/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+  return handleResponse(res);
 } 

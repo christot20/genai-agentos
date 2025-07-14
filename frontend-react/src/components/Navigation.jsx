@@ -42,6 +42,14 @@ const Navigation = () => {
               About
             </Link>
           </li>
+          <li className="nav-item">
+            <Link 
+              to="/agent-flows" 
+              className={`nav-link ${isActive('/agent-flows') ? 'active' : ''}`}
+            >
+              Agent Flows
+            </Link>
+          </li>
         </ul>
       </div>
     </nav>

@@ -7,6 +7,8 @@ import Signup from './pages/Signup';
 import IntakeProcess from './pages/IntakeProcess';
 import BenefitsOverview from './pages/BenefitsOverview';
 import Chat from './pages/Chat';
+import AgentFlowsPage from './pages/AgentFlowsPage';
+import AgentFlowEditPage from './pages/AgentFlowEditPage';
 import './styles/App.scss';
 import { useCookies } from 'react-cookie';
 
@@ -40,6 +42,8 @@ function App() {
             <Route path="/intakeprocess" element={<ProtectedRoute><IntakeProcess /></ProtectedRoute>} />
             <Route path="/benefitsoverview" element={<ProtectedRoute><BenefitsOverview /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+            <Route path="/agent-flows" element={<ProtectedRoute><AgentFlowsPage /></ProtectedRoute>} />
+            <Route path="/agent-flows/:id" element={<ProtectedRoute><AgentFlowEditPage /></ProtectedRoute>} />
           </Routes>
         </main>
       </div>
