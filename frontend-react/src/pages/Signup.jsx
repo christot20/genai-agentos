@@ -29,7 +29,7 @@ const Signup = () => {
   };
 
   return (
-    <div className='homepage-container'>
+    <div className='homepage-container'style={{paddingLeft:"82px", marginTop:"110px"}}>
       <HomepageHeaderWLogo headerText="Sign up for Navicare" logo={logo} logoAltText="GenAI AgentOS Logo" caption="Please sign up using your first name, email, and password or click log into account if you already have one." />
       <InputWLabel label="Username" type="text" placeholder="Username" value={firstName} onChange={setFirstName} id="firstName" />
       <InputWLabel label="Email" type="email" placeholder="Email" value={email} onChange={setEmail} id="email" />
