@@ -12,6 +12,6 @@ RUN npm run build
 
 RUN npm i -g serve
 
-EXPOSE 3000
+EXPOSE 3001
 
-CMD [ "serve", "-s", "dist", "-l", "3000" ]
+CMD [ "serve", "-s", "dist", "-l", "3001" ]

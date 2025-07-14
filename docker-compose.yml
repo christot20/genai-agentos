@@ -14,6 +14,21 @@ services:
      - local-genai-network
     restart: unless-stopped
 
+  old-frontend:
+    container_name: genai-old-frontend
+    build:
+      context: ./old-frontend
+    ports:
+      - "3001:3001"
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=http://backend:8000/
+      - VITE_WS_URL=ws://backend:8000
+    networks:
+      - local-genai-network
+    restart: unless-stopped
+
   router:
     container_name: genai-router
     build:
