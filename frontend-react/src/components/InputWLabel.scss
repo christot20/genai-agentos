@@ -15,8 +15,11 @@
     width: 100%;
     height: 100%;
     background-color: #fff;
-    outline: 3px solid #FF535C;
-    color:#001A29;
+outline: 2px solid oklch(from  #FF535C 40% c h);;
+  &:focus-within, &:hover{
+      outline: 2px solid #FF535C;
+  }
+      color:#001A29;
     font-family: 'Poppins', sans-serif;
     font-weight: 500;
     font-size: 20px;

@@ -216,7 +216,7 @@ const Chat = () => {
       // Map the backend message format to frontend format
       const mappedMessages = (msgRes.items || []).map(msg => ({
         message_id: msg.request_id,
-        message: msg.content,
+        message: msg.content.replaceAll("*", ''),
         sender_type: msg.sender_type === 'user' ? 'User' : 'AI', // Map backend enum to frontend format
         timestamp: msg.created_at
       }));
@@ -252,7 +252,7 @@ const Chat = () => {
   return (
     <div style={{ display: 'flex' }}>
       <ChatModal />
-      <div style={{ flex: 1, paddingLeft: 24 }}>
+      <div style={{ flex: 1, paddingLeft: 24, marginTop:"24px" }}>
         <PageHeader />
         {!chatActive && (
           <>
@@ -308,7 +308,7 @@ const Chat = () => {
                 margin: '32px auto',
                 maxWidth: 760,
                 minHeight: 300,
-                maxHeight: 400,
+                maxHeight: '60dvh',
                 overflowY: 'auto',
                 width: '100%'
               }}
@@ -317,7 +317,7 @@ const Chat = () => {
                 <ChatMessage 
                   key={msg.message_id || i} 
                   from={msg.sender_type === 'User' ? 'user' : 'ai'} 
-                  message={msg.message} 
+                  message={msg.message.replaceAll("*","")} 
                   sender_type={msg.sender_type}
                 />
               ))}
