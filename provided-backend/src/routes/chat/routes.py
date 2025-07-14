@@ -35,16 +35,16 @@ async def get_chat_history(
     page: int = Query(1, ge=1),
     per_page: int = Query(100, ge=0),
 ):
-    if not any((user_id, authorization, x_api_key)):
+    if not any((user_id, authorization)):
         raise HTTPException(
             status_code=400,
-            detail="You must provide either 'user_id' with x-api-key or your jwt token to continue.",
+            detail="You must provide either 'user_id' or your jwt token to continue.",
         )
 
     if all((authorization, x_api_key, user_id)):
         raise HTTPException(
             status_code=400,
-            detail="You must provide either 'user_id' with x-api-key or your jwt token, but not both at the same time.",
+            detail="You must provide either 'user_id' or your jwt token, but not both at the same time.",
         )
 
     if all((authorization, user_id)):
@@ -53,21 +53,16 @@ async def get_chat_history(
             detail="Lookup by user_id is not allowed for plain authenticated users.",
         )
 
-    # Handle API key authentication (for master agent)
-    if x_api_key and user_id:
-        if x_api_key != settings.MASTER_BE_API_KEY:
+    if not user_id and not authorization:
+        if not x_api_key == settings.MASTER_BE_API_KEY:
             raise HTTPException(
-                detail="Invalid x-api-key header.",
+                detail="You must provide x-api-key header if user_id query parameter is provided.",
                 status_code=401,
             )
-    # Handle JWT authentication (for regular users)
-    elif authorization:
         user_id = get_user_id_from_jwt(token=authorization.split(" ")[-1])
-    else:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid authentication method.",
-        )
+
+    if authorization:
+        user_id = get_user_id_from_jwt(token=authorization.split(" ")[-1])
 
     history = await chat_repo.get_paginated_chat_history(
         db=db,

@@ -6,7 +6,9 @@ import PublicRoute from './components/PublicRoute';
 // Lazy load pages
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
-const ChatPage = lazy(() => import('./pages/ChatPage'));
+const ChatPage = lazy(() => import('./pages/ChatPageNew'));
+const HomePage = lazy(() => import('./pages/HomePage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
 const A2AAgentsPage = lazy(() => import('./pages/A2AAgentsPage'));
 const MCPAgentsPage = lazy(() => import('./pages/MCPAgentsPage'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage'));
@@ -28,22 +30,28 @@ export const router = createBrowserRouter(
     {
       path: '/',
       element: (
+        <Suspense fallback={<LoadingFallback />}>
+          <HomePage />
+        </Suspense>
+      ),
+    },
+    {
+      path: '/chat/new',
+      element: (
         <ProtectedRoute>
           <Suspense fallback={<LoadingFallback />}>
             <ChatPage />
           </Suspense>
         </ProtectedRoute>
       ),
-      children: [
-        {
-          index: true,
-          loader: () => redirect('/chat/new'),
-        },
-        {
-          path: '/chat',
-          loader: () => redirect('/chat/new'),
-        },
-      ],
+    },
+    {
+      path: '/about',
+      element: (
+        <Suspense fallback={<LoadingFallback />}>
+          <AboutPage />
+        </Suspense>
+      ),
     },
     {
       path: '/login',

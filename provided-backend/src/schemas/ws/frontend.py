@@ -103,7 +103,6 @@ class AgentResponseDTO(BaseModel):
     response: Union[dict, str]
     request_id: Union[UUID, str]
     session_id: Union[UUID, str]
-    agents_trace: Optional[List[dict]] = []
 
     @model_validator(mode="after")
     def cast_uuid_to_str(self) -> Self:

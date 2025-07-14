@@ -65,14 +65,14 @@ class ChatRepository(
     ):
         q = (
             select(ChatMessage)
-            .join(ChatConversation, ChatMessage.conversation_id == ChatConversation.session_id)
+            .join(self.model.messages)
             .where(
                 and_(
-                    ChatConversation.session_id == session_id,
-                    ChatConversation.creator_id == str(user_id),
+                    self.model.session_id == session_id,
+                    self.model.creator_id == user_id,
                 )
             )
-            .order_by(ChatMessage.created_at.asc())  # Changed to asc() to get chronological order
+            .order_by(ChatMessage.created_at.desc())
         )
         return await paginate(
             db=db, query=q, cast_to=GetChatMessage, page=page, per_page=per_page

@@ -1,0 +1,261 @@
+// Import mixins
+@import 'mixins';
+
+// Global styles and CSS reset
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #001A29;
+  background-image:
+    radial-gradient(transparent 1.2em, #001A29 1.2em),
+    conic-gradient(at 2em 2em, transparent 270deg, #FF535C11 270deg),
+    conic-gradient(at 2em 2em, transparent 270deg, #FF535C18 270deg);
+  background-size: 2em 2em, 8em 8em, 12em 12em;
+  animation: bpx 24s linear infinite, bpy 24s -7.5s linear infinite;
+  color: #fff;
+  line-height: 1.6;
+  font-weight: 400;
+
+  @each $xy in ('x', 'y') {
+    @keyframes bp#{$xy} {
+      0%, 7.5%, 100% { background-position-#{$xy}: 0, 0, 2em; }
+      12.5%, 20% { background-position-#{$xy}: 0, 2em, 0; }
+      25%, 32.5% { background-position-#{$xy}: 0, -2em, 4em; }
+      37.5%, 45% { background-position-#{$xy}: 0, 2em, 6em; }
+      50%, 57.5% { background-position-#{$xy}: 0, -4em, 8em; }
+      62.5%, 70% { background-position-#{$xy}: 0, -6em, 6em; }
+      75%, 82.5% { background-position-#{$xy}: 0, -2em, 4em; }
+      87.5%, 95% { background-position-#{$xy}: 0, -6em, 0; }
+    }
+  }
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+// Global variables
+:root {
+  // Colors
+  --primary-color: #FF535C;
+  --secondary-color: #B4B4B4;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+  --background-color: #001A29;
+  --surface-color: #ffffff;
+  --text-primary: #ffffff;
+  --text-secondary: #B4B4B4;
+  --border-color: #FF535C;
+  
+  // Shadows
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  // Fonts
+  --font-primary: 'Poppins', sans-serif;
+  --font-secondary: 'Nunito', sans-serif;
+  
+  // Font weights
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+}
+
+// Utility classes
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: var(--font-medium);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-family: var(--font-primary);
+
+  &.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+
+    &:hover {
+      background-color: #d43d47;
+    }
+  }
+
+  &.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+
+    &:hover {
+      background-color: #475569;
+    }
+  }
+}
+
+.primary-btn {
+  display: block;
+  width: 400px;
+  height: 46px;
+  background-color: #FF535C;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  margin-top: 23px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(255, 83, 92, 0.2);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover {
+    background-color: #fff;
+    color: #FF535C;
+    border: 3px solid #FF535C;
+    box-shadow: 0 8px 15px rgba(255, 83, 92, 0.3);
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+
+  &:active {
+    background-color: #d43d47;
+    color: #fff;
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(255, 83, 92, 0.2);
+    transition: all 0.1s ease;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 83, 92, 0.3), 0 4px 6px rgba(255, 83, 92, 0.2);
+  }
+}
+
+.secondary-btn {
+  display: block;
+  width: 400px;
+  height: 46px;
+  background-color: #FFF;
+  border: 3px solid #FF535C;
+  color: #FF535C;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 23px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(255, 83, 92, 0.2);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover {
+    background-color: #FF535C;
+    color: #fff;
+    box-shadow: 0 8px 15px rgba(255, 83, 92, 0.3);
+    border-color: #FF535C;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+
+  &:active {
+    background-color: #d43d47;
+    color: #fff;
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(255, 83, 92, 0.2);
+    border-color: #d43d47;
+    transition: all 0.1s ease;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 83, 92, 0.3), 0 4px 6px rgba(255, 83, 92, 0.2);
+  }
+}
+
+// Typography utilities
+.font-primary {
+  font-family: var(--font-primary);
+}
+
+.font-secondary {
+  font-family: var(--font-secondary);
+}
+
+.font-light {
+  font-weight: var(--font-light);
+}
+
+.font-normal {
+  font-weight: var(--font-normal);
+}
+
+.font-medium {
+  font-weight: var(--font-medium);
+}
+
+.font-semibold {
+  font-weight: var(--font-semibold);
+}
+
+.font-bold {
+  font-weight: var(--font-bold);
+}
+
+.font-extrabold {
+  font-weight: var(--font-extrabold);
+}
+
+.main-content {
+  margin-top: 40px;
+} 

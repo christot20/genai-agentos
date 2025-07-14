@@ -1,0 +1,110 @@
+.dashboard {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+.dashboard-header {
+  margin-bottom: 32px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 24px;
+  }
+}
+
+.dashboard-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+  font-family: 'Poppins', sans-serif;
+  
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
+}
+
+.dashboard-subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.dashboard-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.card-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2563eb;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
+}
+
+.card-description {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 8px 0 0 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+.dashboard-section {
+  margin-bottom: 32px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 24px;
+  }
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+  font-family: 'Poppins', sans-serif;
+} 

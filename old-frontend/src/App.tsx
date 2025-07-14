@@ -15,12 +15,14 @@ export function App() {
         <ChatHistoryProvider>
           <SettingsProvider>
             <LogProvider>
-              <RouterProvider
-                router={router}
-                future={{
-                  v7_startTransition: true,
-                }}
-              />
+              <main className="main-content">
+                <RouterProvider
+                  router={router}
+                  future={{
+                    v7_startTransition: true,
+                  }}
+                />
+              </main>
               <ToastContainer
                 position="top-center"
                 autoClose={3000}
