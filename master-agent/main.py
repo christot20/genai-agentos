@@ -48,10 +48,6 @@ async def receive_message(
             max_last_messages=configs.get("max_last_messages", 5)
         )
 
-        logger.info(f"Retrieved chat history with {len(chat_history)} messages")
-        if chat_history:
-            logger.info(f"Last message: {chat_history[-1]}")
-
         chat_history[-1] = attach_files_to_message(message=chat_history[-1], files=files) if files else chat_history[-1]
         init_messages = [
             SystemMessage(content=system_prompt),
@@ -65,8 +61,6 @@ async def receive_message(
             user_id=user_id
         )
 
-        logger.info(f"Retrieved {len(agents)} active agents")
-
         llm = LLMFactory.create(configs=configs)
         master_agent = ReActMasterAgent(model=llm, agents=agents)
 
@@ -78,13 +72,10 @@ async def receive_message(
         )
 
         response = final_state["messages"][-1].content
-        agents_trace = final_state["trace"]
 
         logger.success("Master Agent run successfully")
-        logger.info(f"Response: {response}")
-        logger.info(f"Agents trace: {agents_trace}")
 
-        return {"agents_trace": agents_trace, "response": response, "is_success": True}
+        return {"agents_trace": final_state["trace"], "response": response, "is_success": True}
 
     except Exception as e:
         error_message = f"Unexpected error while running Master Agent: {e}"
